@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% block title %}DRISHTI — News{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">News Dashboard</h1>
+      <p class="page-subtitle" id="newsSubtitle">National &amp; regional news — {{ config.news_refresh_minutes }}min auto-refresh</p>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-live" id="newsBadge">&#9679; LIVE</span>
+      <span class="badge badge-gray" id="newsTs">–</span>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar" style="flex-wrap:wrap;gap:0.75rem;align-items:center">
+  <div class="toolbar-left" style="flex-wrap:wrap;gap:0.5rem">
+    <input type="text" id="newsSearch" class="search-input" placeholder="Search headlines..."
+           oninput="searchNews(this.value)">
+    <select id="langFilter" class="micro-select" onchange="applyFilters()">
+      <option value="">All Languages</option>
+      <!-- Populated dynamically from active feeds — see populateLanguageFilter() -->
+    </select>
+  </div>
+  <div class="toolbar-right" style="gap:0.5rem">
+    <select id="sortOrder" class="micro-select" onchange="applyFilters()">
+      <option value="latest">Latest First</option>
+      <option value="priority">By Source Priority</option>
+      <option value="breaking">Breaking First</option>
+    </select>
+    <button class="btn-refresh" id="newsRefreshBtn" onclick="refreshNews()">&#8635; Refresh</button>
+    <a href="/settings#news-feeds" class="btn-outline" style="font-size:12px">Manage Feeds</a>
+  </div>
+</div>
+
+<!-- Category tabs -->
+<div class="cat-tab-bar" id="catTabBar">
+  <button class="cat-tab active" data-cat="all" onclick="selectCategory('all',this)">
+    All <span class="cat-count" id="cnt-all">–</span>
+  </button>
+  <button class="cat-tab" data-cat="national"       onclick="selectCategory('national',this)">National</button>
+  <button class="cat-tab" data-cat="business"       onclick="selectCategory('business',this)">Business</button>
+  <button class="cat-tab" data-cat="markets"        onclick="selectCategory('markets',this)">Markets</button>
+  <button class="cat-tab" data-cat="politics"       onclick="selectCategory('politics',this)">Politics</button>
+  <button class="cat-tab" data-cat="technology"     onclick="selectCategory('technology',this)">Technology</button>
+  <button class="cat-tab" data-cat="sports"         onclick="selectCategory('sports',this)">Sports</button>
+  <button class="cat-tab" data-cat="health"         onclick="selectCategory('health',this)">Health</button>
+  <button class="cat-tab" data-cat="science"        onclick="selectCategory('science',this)">Science</button>
+  <button class="cat-tab" data-cat="defence"        onclick="selectCategory('defence',this)">Defence</button>
+  <button class="cat-tab" data-cat="environment"    onclick="selectCategory('environment',this)">Environment</button>
+  <button class="cat-tab" data-cat="entertainment"  onclick="selectCategory('entertainment',this)">Entertainment</button>
+  <button class="cat-tab" data-cat="international"  onclick="selectCategory('international',this)">International</button>
+  <button class="cat-tab" data-cat="policy"         onclick="selectCategory('policy',this)">Policy/Govt</button>
+</div>
+
+<!-- Continuous news ticker (always running, like a professional newsroom) -->
+<div id="breakingBanner" style="display:none" class="breaking-banner">
+  <span class="breaking-label" id="breakingLabel">LATEST</span>
+  <div class="breaking-viewport">
+    <div class="breaking-track" id="breakingTrack"></div>
+  </div>
+</div>
+
+<!-- Main layout: articles + sidebar -->
+<div class="news-layout">
+
+  <!-- Articles grid -->
+  <div class="news-main">
+    <div class="news-result-meta" id="resultMeta">
+      <span id="resultCount">Loading...</span>
+      <span class="text-muted" id="sourceCount"></span>
+    </div>
+    <div class="news-grid" id="newsGrid">
+      <div class="skeleton-block" style="height:220px;grid-column:1/-1"></div>
+    </div>
+    <div style="text-align:center;margin-top:1.5rem;display:none" id="loadMoreRow">
+      <button class="btn-outline" onclick="loadMore()">Load More Articles</button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="news-sidebar">
+
+    <!-- Trending keywords -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="card-header"><span class="card-title">Trending Topics</span></div>
+      <div class="trending-cloud" id="trendingCloud">
+        <div class="skeleton-block" style="height:80px"></div>
+      </div>
+    </div>
+
+    <!-- Source health -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="card-header">
+        <span class="card-title">Feed Health</span>
+        <a href="/settings#news-feeds" class="card-link">Manage</a>
+      </div>
+      <div id="feedHealthList"><div class="skeleton-block"></div></div>
+    </div>
+
+    <!-- Active sources -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Active Sources</span>
+        <span class="card-meta" id="activeSourceCount">–</span>
+      </div>
+      <div id="activeSourceList"><div class="skeleton-block"></div></div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const CAT_COLORS = {
+  national:"#3B82F6",business:"#FF6B35",markets:"#22C55E",
+  politics:"#8B5CF6",technology:"#06B6D4",sports:"#F59E0B",
+  health:"#EF4444",science:"#22C55E",defence:"#EF4444",
+  environment:"#22C55E",entertainment:"#EC4899",
+  international:"#6366F1",policy:"#F59E0B",regional:"#8B5CF6",
+};
+const LANGUAGE_NAMES = {
+  en:"English", hi:"Hindi", mr:"Marathi", ta:"Tamil", ml:"Malayalam",
+  kn:"Kannada", te:"Telugu", gu:"Gujarati", bn:"Bengali", or:"Odia",
+  as:"Assamese", pa:"Punjabi", ur:"Urdu",
+};
+
+// Build the language dropdown from whatever languages are actually present
+// in the loaded articles — so it can never go stale as feeds are added.
+let _langsPopulated = false;
+function populateLanguageFilter(articles) {
+  const present = [...new Set(articles.map(a => a.language).filter(Boolean))].sort();
+  const select  = document.getElementById("langFilter");
+  const current = select.value;
+  // Keep the "All Languages" option, rebuild the rest
+  select.innerHTML = '<option value="">All Languages</option>' +
+    present.map(code => `<option value="${code}">${LANGUAGE_NAMES[code] || code.toUpperCase()}</option>`).join("");
+  if (present.includes(current)) select.value = current;
+  _langsPopulated = true;
+}
+
+let allArticles = [], visibleArticles = [], displayedCount = 0;
+let currentCat = "all", currentSearch = "", currentLang = "", currentSort = "latest";
+const PAGE_SIZE = 24;
+
+// ── Load ──────────────────────────────────────────────────────────
+async function loadNews(force = false) {
+  try {
+    const url = "/api/news" + (force ? "?force=1" : "");
+    const res  = await fetch(url);
+    const json = await res.json();
+    if (json.status !== "ok") return;
+    document.getElementById("newsTs").textContent = json.ts;
+    allArticles = json.data.articles || [];
+    updateCounts();
+    populateLanguageFilter(allArticles);
+    applyFilters();
+    renderTrending(json.data.trending || []);
+    renderFeedHealth(json.data.health || {});
+    renderActiveSources(json.data.sources || []);
+    renderBreaking();
+  } catch(e) { console.error("News load error:", e); }
+}
+
+// ── Category counts ────────────────────────────────────────────────
+function updateCounts() {
+  document.getElementById("cnt-all").textContent = allArticles.length;
+}
+
+// ── Category select ────────────────────────────────────────────────
+function selectCategory(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll(".cat-tab").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  applyFilters();
+}
+
+// ── Filters ───────────────────────────────────────────────────────
+function searchNews(q) { currentSearch = q.trim().toLowerCase(); applyFilters(); }
+
+function applyFilters() {
+  currentLang = document.getElementById("langFilter").value;
+  currentSort = document.getElementById("sortOrder").value;
+  let filtered = allArticles;
+  if (currentCat !== "all")   filtered = filtered.filter(a => a.category === currentCat);
+  if (currentSearch)          filtered = filtered.filter(a =>
+    a.title.toLowerCase().includes(currentSearch) ||
+    (a.summary||"").toLowerCase().includes(currentSearch));
+  if (currentLang)            filtered = filtered.filter(a => a.language === currentLang);
+  if (currentSort === "breaking") filtered = [...filtered.filter(a=>a.is_breaking), ...filtered.filter(a=>!a.is_breaking)];
+  else if (currentSort === "priority") filtered = filtered.sort((a,b) => (b.priority||50)-(a.priority||50));
+
+  visibleArticles = filtered;
+  displayedCount  = 0;
+  document.getElementById("newsGrid").innerHTML = "";
+  document.getElementById("loadMoreRow").style.display = "none";
+  loadMore();
+  document.getElementById("resultCount").textContent  = `${filtered.length} articles`;
+  const sources = [...new Set(filtered.map(a=>a.source_name))].length;
+  document.getElementById("sourceCount").textContent  = `from ${sources} sources`;
+}
+
+// ── Render articles ────────────────────────────────────────────────
+function loadMore() {
+  const slice  = visibleArticles.slice(displayedCount, displayedCount + PAGE_SIZE);
+  const grid   = document.getElementById("newsGrid");
+  slice.forEach(a => { grid.insertAdjacentHTML("beforeend", articleCard(a)); });
+  displayedCount += slice.length;
+  const moreRow = document.getElementById("loadMoreRow");
+  moreRow.style.display = displayedCount < visibleArticles.length ? "block" : "none";
+}
+
+function articleCard(a) {
+  const color   = CAT_COLORS[a.category] || "#FF6B35";
+  const breaking= a.is_breaking
+    ? `<span class="art-breaking">BREAKING</span>` : "";
+  const summary = a.summary
+    ? `<div class="art-summary">${a.summary.slice(0,160)}${a.summary.length>160?"…":""}</div>` : "";
+  return `
+  <a href="${a.link}" target="_blank" rel="noopener" class="art-card">
+    <div class="art-colorbar" style="background:${color}"></div>
+    <div class="art-body">
+      <div class="art-top">
+        <span class="art-source-badge">${a.source_icon}</span>
+        <span class="art-cat" style="color:${color}">${a.category}</span>
+        ${breaking}
+        <span class="art-lang ${a.language!=="en"?"art-lang-foreign":""}">${LANGUAGE_NAMES[a.language]||a.language}</span>
+      </div>
+      <div class="art-title">${a.title}</div>
+      ${summary}
+      <div class="art-footer">
+        <span class="art-source">${a.source_name}</span>
+        <span class="art-time">${a.pub_display}</span>
+      </div>
+    </div>
+  </a>`;
+}
+
+// ── Continuous News Ticker ──────────────────────────────────────────
+// Always shows the latest headlines (not just is_breaking-flagged ones),
+// scrolling continuously like a real newsroom ticker. True breaking items
+// get a distinct label prefix.
+function renderBreaking() {
+  const banner = document.getElementById("breakingBanner");
+  const track  = document.getElementById("breakingTrack");
+  const label  = document.getElementById("breakingLabel");
+  if (!allArticles.length) { banner.style.display = "none"; return; }
+
+  const hasBreaking = allArticles.some(a => a.is_breaking);
+  label.textContent = hasBreaking ? "BREAKING" : "LATEST";
+
+  // Take the 12 most recent headlines for the ticker
+  const items = allArticles.slice(0, 12);
+  const itemHtml = items.map(a => {
+    const prefix = a.is_breaking ? `<strong style="color:var(--red)">BREAKING:</strong> ` : "";
+    return `<a href="${a.link}" target="_blank" rel="noopener" class="breaking-item">
+              ${prefix}${a.title}
+              <span class="breaking-time">${a.pub_display || ""}</span>
+            </a>`;
+  }).join("");
+
+  // Duplicate content once for a seamless CSS loop (0% -> -50%)
+  track.innerHTML = itemHtml + itemHtml;
+
+  // Scale animation speed to content length so it always feels consistent
+  const durationSec = Math.max(20, items.length * 6);
+  track.style.animationDuration = durationSec + "s";
+
+  banner.style.display = "flex";
+}
+
+// ── Trending ──────────────────────────────────────────────────────
+function renderTrending(trending) {
+  const cloud = document.getElementById("trendingCloud");
+  if (!trending.length) { cloud.innerHTML='<p class="text-muted" style="padding:0.75rem;font-size:12px">No trending data yet</p>'; return; }
+  const max = trending[0]?.count || 1;
+  cloud.innerHTML = `<div class="trend-cloud">${trending.map(t => {
+    const size = 11 + Math.round((t.count / max) * 6);
+    const opacity = 0.5 + (t.count / max) * 0.5;
+    return `<span class="trend-word" style="font-size:${size}px;opacity:${opacity}"
+              onclick="searchNews('${t.word.toLowerCase()}');document.getElementById('newsSearch').value='${t.word}'"
+              title="${t.count} mentions">${t.word}</span>`;
+  }).join("")}</div>`;
+}
+
+// ── Feed Health ───────────────────────────────────────────────────
+function renderFeedHealth(health) {
+  const el = document.getElementById("feedHealthList");
+  const entries = Object.entries(health);
+  if (!entries.length) { el.innerHTML='<p class="text-muted" style="padding:0.5rem;font-size:11px">No health data yet</p>'; return; }
+  const errors = entries.filter(([,v]) => v.status !== "ok");
+  if (!errors.length) {
+    el.innerHTML='<p class="text-muted" style="padding:0.75rem;font-size:12px">&#10003; All feeds healthy</p>';
+    return;
+  }
+  el.innerHTML = errors.slice(0,6).map(([id,v]) => `
+    <div class="health-row">
+      <span class="health-id">${id.replace(/_/g," ")}</span>
+      <span class="health-status err">${v.status}</span>
+    </div>`).join("");
+}
+
+// ── Active Sources ─────────────────────────────────────────────────
+function renderActiveSources(sources) {
+  const el = document.getElementById("activeSourceList");
+  document.getElementById("activeSourceCount").textContent = sources.length + " feeds";
+  if (!sources.length) { el.innerHTML='<p class="text-muted" style="padding:0.5rem;font-size:11px">–</p>'; return; }
+  el.innerHTML = sources.map(s => `
+    <div class="source-row">
+      <span class="source-icon-sm">${s.icon}</span>
+      <span class="source-name-sm">${s.name}</span>
+      <span class="source-cat-sm" style="color:${CAT_COLORS[s.category]||"#FF6B35"}">${s.category}</span>
+    </div>`).join("");
+}
+
+// Pre-select category from URL (?cat=business etc.)
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get("cat");
+  if (cat) {
+    currentCat = cat;
+    setTimeout(() => {
+      const btn = document.querySelector(`.cat-tab[data-cat="${cat}"]`);
+      if (btn) {
+        document.querySelectorAll(".cat-tab").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      }
+    }, 50);
+  }
+})();
+
+async function refreshNews() {
+  const btn = document.getElementById("newsRefreshBtn");
+  btn.textContent = "Refreshing...";
+  btn.disabled = true;
+  await loadNews(true);
+  btn.textContent = "✓ Updated";
+  setTimeout(() => { btn.textContent = "↺ Refresh"; btn.disabled = false; }, 1500);
+}
+
+loadNews();
+setInterval(() => loadNews(), {{ config.news_refresh_minutes }} * 60 * 1000);
+</script>
+{% endblock %}

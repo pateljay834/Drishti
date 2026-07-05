@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}DRISHTI — Markets{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">Markets</h1>
+      <p class="page-subtitle">NSE · BSE · Commodities · Currency · Top Stocks</p>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-live">● LIVE</span>
+      <span class="badge badge-gray" id="mktTs">–</span>
+    </div>
+  </div>
+</div>
+
+<!-- Period selector -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <span class="toolbar-label">Chart Period:</span>
+    <div class="btn-group" id="periodBtns">
+      <button class="btn-period active" onclick="setPeriod('5d','15m',this)">5D</button>
+      <button class="btn-period" onclick="setPeriod('1mo','1d',this)">1M</button>
+      <button class="btn-period" onclick="setPeriod('3mo','1d',this)">3M</button>
+      <button class="btn-period" onclick="setPeriod('6mo','1wk',this)">6M</button>
+      <button class="btn-period" onclick="setPeriod('1y','1wk',this)">1Y</button>
+      <button class="btn-period" onclick="setPeriod('5y','1mo',this)">5Y</button>
+    </div>
+  </div>
+  <button class="btn-refresh" id="mktRefreshBtn" onclick="refreshMarkets()">↺ Refresh</button>
+</div>
+
+<!-- Indices Section -->
+<h2 class="section-title-sm">Indices</h2>
+<div class="indices-row" id="indicesRow">
+  <div class="skeleton-block" style="height:90px"></div>
+</div>
+
+<!-- Charts Row -->
+<div class="charts-row">
+  <div class="card chart-card">
+    <div class="card-header">
+      <span class="card-title">Sensex (^BSESN)</span>
+    </div>
+    <canvas id="sensexChart" height="160"></canvas>
+  </div>
+  <div class="card chart-card">
+    <div class="card-header">
+      <span class="card-title">Nifty 50 (^NSEI)</span>
+    </div>
+    <canvas id="niftyChart" height="160"></canvas>
+  </div>
+  <div class="card chart-card">
+    <div class="card-header">
+      <span class="card-title">USD / INR</span>
+    </div>
+    <canvas id="usdinrChart" height="160"></canvas>
+  </div>
+</div>
+
+<!-- Sector + Commodity Row -->
+<div class="two-col-grid">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Sectoral Indices</span></div>
+    <div class="sector-list" id="sectorList">
+      <div class="skeleton-block"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Commodities & FX</span></div>
+    <div class="sector-list" id="commodityList">
+      <div class="skeleton-block"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Top Stocks -->
+<h2 class="section-title-sm" style="margin-top:2rem">Nifty 50 — Top Stocks</h2>
+<div class="card">
+  <div class="stocks-table-wrap">
+    <table class="stocks-table" id="stocksTable">
+      <thead>
+        <tr>
+          <th>Company</th><th>Symbol</th><th class="num">Price (₹)</th>
+          <th class="num">Change</th><th class="num">Change %</th>
+        </tr>
+      </thead>
+      <tbody id="stocksBody">
+        <tr><td colspan="5"><div class="skeleton-block"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+let chartPeriod = "5d", chartInterval = "15m";
+let sensexChart, niftyChart, usdinrChart;
+
+async function loadMarkets(force = false) {
+  try {
+    const url = "/api/markets" + (force ? "?force=1" : "");
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.status !== "ok") return;
+    document.getElementById("mktTs").textContent = json.ts;
+    renderIndicesRow(json.data.indices);
+    renderSectorList(json.data.indices);
+    renderCommodityList(json.data.indices);
+    renderStocksTable(json.data.stocks);
+  } catch(e) { console.error(e); }
+}
+
+async function loadCharts() {
+  const symbols = ["^BSESN","^NSEI","USDINR=X"];
+  const canvases = ["sensexChart","niftyChart","usdinrChart"];
+  const charts = [null, null, null];
+  const existing = [sensexChart, niftyChart, usdinrChart];
+  for (let i = 0; i < symbols.length; i++) {
+    try {
+      const res = await fetch(`/api/markets/history/${encodeURIComponent(symbols[i])}?period=${chartPeriod}&interval=${chartInterval}`);
+      const json = await res.json();
+      if (json.status !== "ok") continue;
+      const d = json.data;
+      if (existing[i]) existing[i].destroy();
+      const ctx = document.getElementById(canvases[i]).getContext("2d");
+      const isUp = d.closes.length > 1 && d.closes[d.closes.length-1] >= d.closes[0];
+      charts[i] = buildLineChart(ctx, d.labels, d.closes, isUp ? "#22C55E" : "#EF4444");
+    } catch(e) { console.error(e); }
+  }
+  [sensexChart, niftyChart, usdinrChart] = charts;
+}
+
+function renderIndicesRow(indices) {
+  const priority = ["^BSESN","^NSEI","^NSEBANK","^CNXIT","^CNXAUTO","^CNXPHARMA","^CNXMETAL","^CNXFMCG","^INDIAVIX"];
+  const ordered = priority.map(s => indices.find(i => i.symbol===s)).filter(Boolean);
+  document.getElementById("indicesRow").innerHTML = ordered.map(idx => {
+    const up = (idx.change_pct||0)>=0;
+    return `<div class="idx-tile ${up?'up':'down'}">
+      <div class="it-name">${idx.name}</div>
+      <div class="it-price">${fmt(idx.price, idx.category)}</div>
+      <div class="it-chg">${up?'▲':'▼'} ${Math.abs(idx.change_pct??0).toFixed(2)}%</div>
+      <div class="it-abs">${up?'+':''}${(idx.change??0).toFixed(2)}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderSectorList(indices) {
+  const sectors = ["^CNXIT","^NSEBANK","^CNXAUTO","^CNXPHARMA","^CNXMETAL","^CNXFMCG","^INDIAVIX"];
+  const list = document.getElementById("sectorList");
+  list.innerHTML = sectors.map(s => {
+    const idx = indices.find(i => i.symbol===s);
+    if (!idx) return "";
+    const up = (idx.change_pct||0)>=0;
+    return `<div class="sector-row">
+      <span class="sr-name">${idx.name}</span>
+      <span class="sr-price">${fmt(idx.price, idx.category)}</span>
+      <span class="sr-chg ${up?'pos':'neg'}">${up?'▲':'▼'} ${Math.abs(idx.change_pct??0).toFixed(2)}%</span>
+    </div>`;
+  }).join("");
+}
+
+function renderCommodityList(indices) {
+  const comms = ["USDINR=X","GC=F","CL=F","SI=F"];
+  const list = document.getElementById("commodityList");
+  list.innerHTML = comms.map(s => {
+    const idx = indices.find(i => i.symbol===s);
+    if (!idx) return "";
+    const up = (idx.change_pct||0)>=0;
+    return `<div class="sector-row">
+      <span class="sr-name">${idx.name}</span>
+      <span class="sr-price">${fmt(idx.price, idx.category)}</span>
+      <span class="sr-chg ${up?'pos':'neg'}">${up?'▲':'▼'} ${Math.abs(idx.change_pct??0).toFixed(2)}%</span>
+    </div>`;
+  }).join("");
+}
+
+function renderStocksTable(stocks) {
+  const tbody = document.getElementById("stocksBody");
+  tbody.innerHTML = (stocks||[]).map(s => {
+    const up = (s.change_pct||0)>=0;
+    return `<tr>
+      <td><strong>${s.name}</strong></td>
+      <td class="mono">${s.symbol.replace(".NS","")}</td>
+      <td class="num mono">₹${(s.price||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td class="num ${up?'pos':'neg'}">${up?'+':''}${(s.change||0).toFixed(2)}</td>
+      <td class="num ${up?'pos':'neg'}">${up?'▲':'▼'} ${Math.abs(s.change_pct||0).toFixed(2)}%</td>
+    </tr>`;
+  }).join("");
+}
+
+function fmt(val, cat) {
+  if (val==null) return "–";
+  if (cat==="currency") return "₹"+val.toFixed(2);
+  if (cat==="commodity") return "$"+val.toFixed(2);
+  return val>=1000 ? val.toLocaleString("en-IN",{maximumFractionDigits:2}) : val.toFixed(2);
+}
+
+function setPeriod(period, interval, btn) {
+  chartPeriod = period; chartInterval = interval;
+  document.querySelectorAll(".btn-period").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadCharts();
+}
+
+async function refreshMarkets() {
+  const btn = document.getElementById("mktRefreshBtn");
+  btn.textContent = "Refreshing...";
+  btn.disabled = true;
+  await loadMarkets(true);
+  await loadCharts();
+  btn.textContent = "✓ Updated";
+  setTimeout(() => { btn.textContent = "↺ Refresh"; btn.disabled = false; }, 1500);
+}
+
+loadMarkets();
+loadCharts();
+setInterval(loadMarkets, 5*60*1000);
+</script>
+{% endblock %}

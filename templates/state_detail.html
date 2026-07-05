@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}DRISHTI — {{ state.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <a href="/states" class="breadcrumb">&#8592; States</a>
+      <h1 class="page-title"
+          style="border-left:5px solid {{ state.color|default('#FF6B35') }};padding-left:1rem">
+        {{ state.name }}
+        <span class="page-title-code">{{ state.code }}</span>
+      </h1>
+      <p class="page-subtitle">{{ state.type }} &middot; {{ state.region|capitalize }} India &middot; Capital: {{ state.capital }}</p>
+    </div>
+    <div class="header-badges">
+      <span class="badge {{ 'badge-ut' if state.type=='UT' else 'badge-state' }}">{{ state.type }}</span>
+      <span class="badge badge-gray">{{ state.region|upper }}</span>
+    </div>
+  </div>
+</div>
+
+{% if state.highlight %}
+<div class="highlight-banner" style="border-left-color:{{ state.color|default('#FF6B35') }}">
+  <span class="hb-icon">&#11088;</span>
+  <span>{{ state.highlight }}</span>
+</div>
+{% endif %}
+
+<!-- Reference facts strip (structural, not economic-performance figures) -->
+<div class="state-stats-strip">
+  <div class="sss-item"><div class="sss-val">{{ "{:,.1f}M".format(state.population/1e6) }}</div><div class="sss-label">Population</div><div class="sss-note">Census-based</div></div>
+  <div class="sss-item"><div class="sss-val">{{ "{:,}".format(state.area_sq_km) }} km&#178;</div><div class="sss-label">Area</div><div class="sss-note">Survey of India</div></div>
+  <div class="sss-item"><div class="sss-val">{{ state.literacy_pct }}%</div><div class="sss-label">Literacy</div><div class="sss-note">Census 2011</div></div>
+  <div class="sss-item"><div class="sss-val">{{ state.major_cities|length }}</div><div class="sss-label">Major Cities</div><div class="sss-note">Listed below</div></div>
+</div>
+
+<!-- Tabs: News is primary now -->
+<div class="state-tabs" id="stateTabs">
+  <button class="state-tab active" onclick="showTab('news',this)">
+    State News <span class="tab-count" id="newsTabCount"></span>
+  </button>
+  <button class="state-tab" onclick="showTab('overview',this)">Overview</button>
+</div>
+
+<!-- ── TAB: State News (primary) ─────────────────────────────────── -->
+<div class="tab-panel" id="tab-news">
+  <div class="toolbar" style="margin-top:0;margin-bottom:1rem">
+    <div class="toolbar-left">
+      <input type="text" id="stateNewsSearch" class="search-input"
+             placeholder="Search {{ state.name }} news..." oninput="filterStateNews(this.value)">
+      <div class="btn-group">
+        <button class="btn-period active" onclick="setNewsFilter('all',this)">All</button>
+        <button class="btn-period" onclick="setNewsFilter('local',this)">Local Feeds</button>
+        <button class="btn-period" onclick="setNewsFilter('national',this)">National Tagged</button>
+      </div>
+    </div>
+    <button class="btn-refresh" id="stateNewsRefreshBtn" onclick="refreshStateNews()">&#8635; Refresh</button>
+  </div>
+
+  <div class="local-feeds-bar" id="localFeedsBar"></div>
+
+  <div class="news-grid" id="stateNewsGrid">
+    <div class="skeleton-block" style="height:200px;grid-column:1/-1"></div>
+  </div>
+  <div style="text-align:center;margin-top:1rem;display:none" id="stateLoadMoreRow">
+    <button class="btn-outline" onclick="stateLoadMore()">Load More</button>
+  </div>
+</div>
+
+<!-- ── TAB: Overview (reference facts only, no economic claims) ──── -->
+<div class="tab-panel" id="tab-overview" style="display:none">
+  <div class="state-detail-grid">
+    <div class="sdg-left">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Leadership &amp; Administration</span></div>
+        <div class="detail-info-list">
+          <div class="dil-item"><span class="dil-key">{{ "Chief Minister" if state.type=="State" else "Lt. Gov / Administrator" }}</span><span class="dil-val">{{ state.cm_lt_gov }}</span></div>
+          <div class="dil-item"><span class="dil-key">Capital</span><span class="dil-val">{{ state.capital }}</span></div>
+          <div class="dil-item"><span class="dil-key">Region</span><span class="dil-val">{{ state.region|capitalize }} India</span></div>
+          <div class="dil-item"><span class="dil-key">Status</span><span class="dil-val">{{ "Union Territory" if state.type=="UT" else "State" }}</span></div>
+        </div>
+      </div>
+      {% if state.key_companies %}
+      <div class="card" style="margin-top:1rem">
+        <div class="card-header"><span class="card-title">Notable Companies / HQs</span></div>
+        <div class="tag-cloud">
+          {% for co in state.key_companies %}
+            <span class="tag-item tag-company">{{ co }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      <div class="card" style="margin-top:1rem">
+        <div class="card-header"><span class="card-title">About This Page</span></div>
+        <div style="padding:0.85rem;font-size:12px;color:var(--t3);line-height:1.6">
+          Population, area, and literacy figures are sourced from Census data
+          and Survey of India (see footer). DRISHTI intentionally does not
+          display GDP, growth-rate, or per-capita-income figures on state
+          pages, since these change constantly and cannot be verified as
+          current without a live government API — showing stale numbers as
+          if live would be misleading. Use the <strong>State News</strong>
+          tab for what's actually happening right now.
+        </div>
+      </div>
+    </div>
+    <div class="sdg-right">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Major Industries</span></div>
+        <div class="industry-grid">
+          {% for ind in state.major_industries %}
+            <div class="industry-item">
+              <span class="ind-dot" style="background:{{ state.color|default('#FF6B35') }}"></span>{{ ind }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <div class="card-header"><span class="card-title">Major Cities</span></div>
+        <div class="tag-cloud">
+          {% for city in state.major_cities %}
+            <span class="tag-item tag-city">&#127961; {{ city }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% if state.key_sectors %}
+      <div class="card" style="margin-top:1rem">
+        <div class="card-header"><span class="card-title">Sector Notes</span></div>
+        <div style="padding:0.85rem;font-size:12px;color:var(--t2);line-height:1.6">{{ state.key_sectors }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const CAT_COLORS = {
+  national:"#3B82F6",business:"#FF6B35",markets:"#22C55E",
+  politics:"#8B5CF6",technology:"#06B6D4",sports:"#F59E0B",
+  health:"#EF4444",science:"#22C55E",defence:"#EF4444",
+  environment:"#22C55E",entertainment:"#EC4899",
+  international:"#6366F1",policy:"#F59E0B",regional:"#8B5CF6",
+};
+const LANGUAGE_NAMES = {
+  en:"English", hi:"Hindi", mr:"Marathi", ta:"Tamil", ml:"Malayalam",
+  kn:"Kannada", te:"Telugu", gu:"Gujarati", bn:"Bengali", or:"Odia",
+  as:"Assamese", pa:"Punjabi", ur:"Urdu",
+};
+const STATE_ID = "{{ state.id }}";
+let allStateNews = [], visibleState = [], stateDisplayed = 0;
+let newsFilterMode = "all";
+
+function showTab(name, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+  document.querySelectorAll(".state-tab").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + name).style.display = "block";
+  btn.classList.add("active");
+}
+
+async function loadStateNews(force = false) {
+  try {
+    const res  = await fetch(`/api/news/state/${STATE_ID}${force?"?force=1":""}`);
+    const json = await res.json();
+    if (json.status !== "ok") return;
+    allStateNews = json.data.articles || [];
+    const count  = document.getElementById("newsTabCount");
+    if (count) count.textContent = allStateNews.length;
+    renderLocalFeedsBar(json.data.local_sources || []);
+    setNewsFilter(newsFilterMode, null);
+  } catch(e) { console.error("State news error:", e); }
+}
+
+function renderLocalFeedsBar(sources) {
+  const bar = document.getElementById("localFeedsBar");
+  if (!sources.length) {
+    bar.innerHTML = `<p class="text-muted" style="font-size:11px;margin-bottom:0.5rem">
+      No dedicated local RSS feed configured for this state yet — showing nationally-tagged articles.
+      <a href="/news/feeds" style="color:var(--saffron)">Add one in Feed Manager &#8594;</a></p>`;
+    return;
+  }
+  bar.innerHTML = `<div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem">
+    <span style="font-size:11px;color:var(--t2)">Local feeds:</span>
+    ${sources.map(s=>`<span class="art-source-badge" title="${s.name}">${s.icon}</span><span style="font-size:11px;color:var(--t2)">${s.name} (${LANGUAGE_NAMES[s.language]||s.language})</span>`).join('<span style="color:var(--t3)"> &middot; </span>')}
+  </div>`;
+}
+
+function setNewsFilter(mode, btn) {
+  newsFilterMode = mode;
+  if (btn) {
+    document.querySelectorAll(".btn-period").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+  }
+  let filtered = allStateNews;
+  if (mode === "local")    filtered = allStateNews.filter(a => a.is_local);
+  if (mode === "national") filtered = allStateNews.filter(a => !a.is_local);
+  const q = document.getElementById("stateNewsSearch")?.value?.trim().toLowerCase();
+  if (q) filtered = filtered.filter(a => a.title.toLowerCase().includes(q) || (a.summary||"").toLowerCase().includes(q));
+  visibleState   = filtered;
+  stateDisplayed = 0;
+  document.getElementById("stateNewsGrid").innerHTML = "";
+  document.getElementById("stateLoadMoreRow").style.display = "none";
+  stateLoadMore();
+}
+
+function filterStateNews(q) { setNewsFilter(newsFilterMode, null); }
+
+function stateLoadMore() {
+  const slice = visibleState.slice(stateDisplayed, stateDisplayed + 18);
+  const grid  = document.getElementById("stateNewsGrid");
+  slice.forEach(a => { grid.insertAdjacentHTML("beforeend", stateCard(a)); });
+  stateDisplayed += slice.length;
+  const moreRow = document.getElementById("stateLoadMoreRow");
+  moreRow.style.display = stateDisplayed < visibleState.length ? "block" : "none";
+  if (!visibleState.length && stateDisplayed === 0)
+    grid.innerHTML = '<p class="empty-msg">No news found for this state yet. Try refreshing or check the Feed Manager.</p>';
+}
+
+function stateCard(a) {
+  const color   = CAT_COLORS[a.category] || "#FF6B35";
+  const local   = a.is_local ? `<span style="font-size:9px;background:rgba(34,197,94,.15);color:#22C55E;padding:1px 5px;border-radius:3px;font-family:var(--font-m)">LOCAL</span>` : "";
+  const summary = a.summary ? `<div class="art-summary">${a.summary.slice(0,140)}${a.summary.length>140?"…":""}</div>` : "";
+  return `
+  <a href="${a.link}" target="_blank" rel="noopener" class="art-card">
+    <div class="art-colorbar" style="background:${color}"></div>
+    <div class="art-body">
+      <div class="art-top">
+        <span class="art-source-badge">${a.source_icon}</span>
+        <span class="art-cat" style="color:${color}">${a.category}</span>
+        ${local}
+        <span class="art-lang ${a.language!=="en"?"art-lang-foreign":""}">${LANGUAGE_NAMES[a.language]||a.language}</span>
+      </div>
+      <div class="art-title">${a.title}</div>
+      ${summary}
+      <div class="art-footer">
+        <span class="art-source">${a.source_name}</span>
+        <span class="art-time">${a.pub_display}</span>
+      </div>
+    </div>
+  </a>`;
+}
+
+async function refreshStateNews() {
+  const btn = document.getElementById("stateNewsRefreshBtn");
+  btn.textContent = "Refreshing...";
+  btn.disabled = true;
+  await loadStateNews(true);
+  btn.textContent = "✓ Updated";
+  setTimeout(() => { btn.textContent = "↺ Refresh"; btn.disabled = false; }, 1500);
+}
+
+loadStateNews();
+</script>
+{% endblock %}

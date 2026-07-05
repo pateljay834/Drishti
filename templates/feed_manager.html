@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% block title %}DRISHTI — Feed Manager{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <a href="/settings" class="breadcrumb">&#8592; Settings</a>
+      <h1 class="page-title">News Feed Manager</h1>
+      <p class="page-subtitle">Add, edit, toggle or remove RSS feeds &mdash; all 88 feeds configurable</p>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gray" id="totalCount">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar" style="flex-wrap:wrap;gap:0.75rem">
+  <div class="toolbar-left" style="flex-wrap:wrap;gap:0.5rem">
+    <input type="text" id="feedSearch" class="search-input" placeholder="Search feeds..." oninput="filterFeeds(this.value)">
+    <select id="scopeFilter" class="micro-select" onchange="renderFeeds()">
+      <option value="all">All Feeds</option>
+      <option value="national">National Only</option>
+      <option value="state">State Only</option>
+    </select>
+    <select id="catFilter" class="micro-select" onchange="renderFeeds()">
+      <option value="">All Categories</option>
+      <option value="national">National</option>
+      <option value="business">Business</option>
+      <option value="markets">Markets</option>
+      <option value="politics">Politics</option>
+      <option value="technology">Technology</option>
+      <option value="sports">Sports</option>
+      <option value="health">Health</option>
+      <option value="science">Science</option>
+      <option value="defence">Defence</option>
+      <option value="environment">Environment</option>
+      <option value="entertainment">Entertainment</option>
+      <option value="international">International</option>
+      <option value="policy">Policy</option>
+      <option value="regional">Regional</option>
+    </select>
+    <select id="statusFilter" class="micro-select" onchange="renderFeeds()">
+      <option value="">All Status</option>
+      <option value="enabled">Enabled</option>
+      <option value="disabled">Disabled</option>
+    </select>
+  </div>
+  <div class="toolbar-right">
+    <button class="btn-primary" onclick="showAddFeed()">+ Add Feed</button>
+  </div>
+</div>
+
+<!-- Feed table -->
+<div class="card">
+  <div class="stocks-table-wrap">
+    <table class="stocks-table" id="feedTable">
+      <thead>
+        <tr>
+          <th>Icon</th><th>Name</th><th>Category</th><th>Scope</th>
+          <th>Language</th><th>Priority</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="feedTableBody">
+        <tr><td colspan="8"><div class="skeleton-block"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add / Edit Feed Modal -->
+<div id="feedModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeFeedModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="modalTitle" class="card-title">Add New Feed</span>
+      <button onclick="closeFeedModal()" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="setting-row">
+        <label class="setting-label">RSS URL *</label>
+        <div style="flex:1;display:flex;gap:0.5rem">
+          <input type="url" id="fUrl" class="setting-input" style="flex:1;width:auto" placeholder="https://example.com/feed">
+          <button class="btn-refresh" onclick="testFeed()" id="testBtn">Test</button>
+        </div>
+      </div>
+      <div id="testResult" style="padding:0.25rem 0.5rem;font-size:11px;display:none"></div>
+      <div class="setting-row">
+        <label class="setting-label">Feed Name *</label>
+        <input type="text" id="fName" class="setting-input" style="flex:1;width:auto" placeholder="e.g. The Hindu Business">
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Icon (2-5 chars)</label>
+        <input type="text" id="fIcon" class="setting-input" maxlength="5" placeholder="TH">
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Category *</label>
+        <select id="fCategory" class="micro-select">
+          <option value="national">National</option>
+          <option value="business">Business</option>
+          <option value="markets">Markets</option>
+          <option value="politics">Politics</option>
+          <option value="technology">Technology</option>
+          <option value="sports">Sports</option>
+          <option value="health">Health</option>
+          <option value="science">Science</option>
+          <option value="defence">Defence</option>
+          <option value="environment">Environment</option>
+          <option value="entertainment">Entertainment</option>
+          <option value="international">International</option>
+          <option value="policy">Policy</option>
+          <option value="regional">Regional</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Language</label>
+        <select id="fLang" class="micro-select">
+          <option value="en">English</option>
+          <option value="hi">Hindi</option>
+          <option value="mr">Marathi</option>
+          <option value="ta">Tamil</option>
+          <option value="ml">Malayalam</option>
+          <option value="kn">Kannada</option>
+          <option value="te">Telugu</option>
+          <option value="gu">Gujarati</option>
+          <option value="bn">Bengali</option>
+          <option value="or">Odia</option>
+          <option value="as">Assamese</option>
+          <option value="pa">Punjabi</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Scope</label>
+        <select id="fScope" class="micro-select" onchange="toggleStateSelect()">
+          <option value="national">National</option>
+          <option value="state">State-specific</option>
+        </select>
+      </div>
+      <div class="setting-row" id="stateSelectRow" style="display:none">
+        <label class="setting-label">State</label>
+        <select id="fState" class="micro-select" style="flex:1">
+          <option value="">Select state...</option>
+          {% for sid, sname in states_list %}
+          <option value="{{ sid }}">{{ sname }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Priority (1-100)</label>
+        <input type="number" id="fPriority" class="setting-input" value="60" min="1" max="100">
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Description</label>
+        <input type="text" id="fDesc" class="setting-input" style="flex:1;width:auto" placeholder="Optional note">
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Enabled</label>
+        <label class="toggle">
+          <input type="checkbox" id="fEnabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-refresh" onclick="closeFeedModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveFeed()" id="saveBtn">Add Feed</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const CAT_COLORS = {
+  national:"#3B82F6",business:"#FF6B35",markets:"#22C55E",
+  politics:"#8B5CF6",technology:"#06B6D4",sports:"#F59E0B",
+  health:"#EF4444",science:"#22C55E",defence:"#EF4444",
+  environment:"#22C55E",entertainment:"#EC4899",
+  international:"#6366F1",policy:"#F59E0B",regional:"#8B5CF6",
+};
+let allFeeds = [], searchQ = "";
+
+// ── Load feeds ────────────────────────────────────────────────────
+async function loadFeeds() {
+  const res  = await fetch("/api/news/sources");
+  const json = await res.json();
+  if (json.status !== "ok") return;
+  allFeeds = json.data.all;
+  document.getElementById("totalCount").textContent = `${allFeeds.length} feeds`;
+  renderFeeds();
+}
+
+function filterFeeds(q) { searchQ = q.toLowerCase(); renderFeeds(); }
+
+function renderFeeds() {
+  const scope    = document.getElementById("scopeFilter").value;
+  const cat      = document.getElementById("catFilter").value;
+  const status   = document.getElementById("statusFilter").value;
+  let filtered   = allFeeds;
+  if (searchQ)             filtered = filtered.filter(f => f.name.toLowerCase().includes(searchQ) || f.id.includes(searchQ) || (f.description||"").toLowerCase().includes(searchQ));
+  if (scope === "national")filtered = filtered.filter(f => f.scope === "national");
+  if (scope === "state")   filtered = filtered.filter(f => f.scope === "state");
+  if (cat)                 filtered = filtered.filter(f => f.category === cat);
+  if (status === "enabled") filtered = filtered.filter(f => f.enabled);
+  if (status === "disabled")filtered = filtered.filter(f => !f.enabled);
+  const tbody = document.getElementById("feedTableBody");
+  if (!filtered.length) { tbody.innerHTML='<tr><td colspan="8" class="text-muted" style="padding:1.5rem;text-align:center">No feeds match filters</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(f => {
+    const color  = CAT_COLORS[f.category]||"#FF6B35";
+    const enCls  = f.enabled ? "pos" : "neg";
+    const enTxt  = f.enabled ? "ON" : "OFF";
+    const scope  = f.scope === "national"
+      ? `<span class="badge badge-state" style="font-size:9px">National</span>`
+      : `<span class="badge badge-ut" style="font-size:9px">${f.state_id||"State"}</span>`;
+    return `<tr>
+      <td><span class="art-source-badge">${f.icon}</span></td>
+      <td><strong>${f.name}</strong><br><span style="font-size:10px;color:var(--t3)">${(f.description||"").slice(0,50)}</span></td>
+      <td><span style="color:${color};font-size:11px;font-weight:600">${f.category}</span></td>
+      <td>${scope}</td>
+      <td class="mono" style="font-size:11px">${f.language}</td>
+      <td class="mono" style="font-size:11px">${f.priority}</td>
+      <td><span class="${enCls}" style="font-family:var(--font-m);font-size:11px;font-weight:700">${enTxt}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn-refresh" style="padding:3px 8px;font-size:11px" onclick="toggleFeed('${f.id}',${!f.enabled})">${f.enabled?"Disable":"Enable"}</button>
+        <button class="btn-danger-sm" style="padding:3px 8px;font-size:11px;margin-left:4px" onclick="deleteFeed('${f.id}','${f.name}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+// ── Actions ───────────────────────────────────────────────────────
+async function toggleFeed(id, newState) {
+  const res  = await fetch(`/api/news/sources/${id}/toggle`, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({enabled:newState})});
+  const json = await res.json();
+  if (json.status === "ok") { await loadFeeds(); }
+  else alert("Error: " + json.message);
+}
+
+async function deleteFeed(id, name) {
+  if (!confirm(`Delete feed "${name}"?\nThis cannot be undone.`)) return;
+  const res  = await fetch(`/api/news/sources/${id}`, {method:"DELETE"});
+  const json = await res.json();
+  if (json.status === "ok") { await loadFeeds(); }
+  else alert("Error: " + json.message);
+}
+
+// ── Add Feed Modal ─────────────────────────────────────────────────
+function showAddFeed() {
+  document.getElementById("feedModal").style.display = "flex";
+  document.getElementById("modalTitle").textContent  = "Add New Feed";
+  document.getElementById("saveBtn").textContent     = "Add Feed";
+}
+function closeFeedModal() { document.getElementById("feedModal").style.display = "none"; }
+function toggleStateSelect() {
+  const show = document.getElementById("fScope").value === "state";
+  document.getElementById("stateSelectRow").style.display = show ? "flex" : "none";
+}
+
+async function testFeed() {
+  const url = document.getElementById("fUrl").value.trim();
+  if (!url) return;
+  const btn = document.getElementById("testBtn");
+  const res_el = document.getElementById("testResult");
+  btn.textContent = "Testing..."; btn.disabled = true;
+  res_el.style.display = "block";
+  res_el.textContent   = "Fetching...";
+  try {
+    const res  = await fetch("/api/news/sources/test", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url})});
+    const json = await res.json();
+    if (json.status === "ok" && json.data.ok) {
+      res_el.style.color = "var(--green)";
+      res_el.textContent = `✓ OK — ${json.data.article_count} articles found. Feed: "${json.data.feed_title}" | Sample: "${json.data.sample_title}"`;
+      if (json.data.feed_title && !document.getElementById("fName").value)
+        document.getElementById("fName").value = json.data.feed_title;
+    } else {
+      res_el.style.color = "var(--red)";
+      res_el.textContent = `✗ Failed — ${json.data?.error || json.message}`;
+    }
+  } catch(e) {
+    res_el.style.color = "var(--red)";
+    res_el.textContent = "✗ Network error";
+  }
+  btn.textContent = "Test"; btn.disabled = false;
+}
+
+async function saveFeed() {
+  const url  = document.getElementById("fUrl").value.trim();
+  const name = document.getElementById("fName").value.trim();
+  if (!url || !name) { alert("URL and Name are required"); return; }
+  const scope   = document.getElementById("fScope").value;
+  const stateId = scope === "state" ? document.getElementById("fState").value : "";
+  const payload = {
+    name, url,
+    icon:        document.getElementById("fIcon").value.trim() || name.slice(0,3).toUpperCase(),
+    category:    document.getElementById("fCategory").value,
+    language:    document.getElementById("fLang").value,
+    priority:    parseInt(document.getElementById("fPriority").value)||60,
+    description: document.getElementById("fDesc").value.trim(),
+    enabled:     document.getElementById("fEnabled").checked,
+    scope, state_id: stateId,
+  };
+  const res  = await fetch("/api/news/sources", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const json = await res.json();
+  if (json.status === "ok") { closeFeedModal(); await loadFeeds(); alert("Feed added! It will be fetched on next refresh."); }
+  else alert("Error: " + json.message);
+}
+
+loadFeeds();
+</script>
+{% endblock %}

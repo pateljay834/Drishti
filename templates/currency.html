@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}DRISHTI — INR Currency{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">INR Currency Dashboard</h1>
+      <p class="page-subtitle">Indian Rupee vs 8 major currencies · Live rates via yfinance · 15-min delayed</p>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-live">● LIVE</span>
+      <span class="badge badge-gray" id="curTs">–</span>
+    </div>
+  </div>
+</div>
+
+<!-- Currency Rate Cards -->
+<div class="currency-grid" id="currencyGrid">
+  <div class="skeleton-block" style="height:100px;grid-column:1/-1"></div>
+</div>
+
+<!-- Chart row -->
+<div class="toolbar" style="margin-top:1.5rem">
+  <div class="toolbar-left">
+    <span class="toolbar-label">Chart Period:</span>
+    <div class="btn-group">
+      <button class="btn-period active" onclick="setP('5d','15m',this)">5D</button>
+      <button class="btn-period" onclick="setP('1mo','1d',this)">1M</button>
+      <button class="btn-period" onclick="setP('3mo','1d',this)">3M</button>
+      <button class="btn-period" onclick="setP('1y','1wk',this)">1Y</button>
+    </div>
+    <span class="toolbar-label" style="margin-left:1rem">Pair:</span>
+    <select id="pairSelect" class="micro-select" onchange="loadChart()">
+      <option value="USDINR=X">USD / INR</option>
+      <option value="EURINR=X">EUR / INR</option>
+      <option value="GBPINR=X">GBP / INR</option>
+      <option value="JPYINR=X">JPY / INR</option>
+      <option value="AEDINR=X">AED / INR</option>
+      <option value="SGDINR=X">SGD / INR</option>
+      <option value="CNHINR=X">CNH / INR</option>
+    </select>
+  </div>
+  <button class="btn-refresh" id="curRefreshBtn" onclick="refreshCurrency()">↺ Refresh</button>
+</div>
+
+<div class="card chart-card">
+  <div class="card-header">
+    <span class="card-title" id="chartTitle">USD / INR — Historical</span>
+    <span class="card-meta">yfinance · 15-min delayed</span>
+  </div>
+  <canvas id="currencyChart" height="200"></canvas>
+</div>
+
+<!-- INR Context -->
+<div class="two-col-grid" style="margin-top:1.25rem">
+  <div class="card">
+    <div class="card-header"><span class="card-title">INR Key Facts</span></div>
+    <div class="detail-info-list">
+      <div class="dil-item"><span class="dil-key">Currency</span><span class="dil-val">Indian Rupee (₹)</span></div>
+      <div class="dil-item"><span class="dil-key">ISO Code</span><span class="dil-val mono">INR</span></div>
+      <div class="dil-item"><span class="dil-key">Central Bank</span><span class="dil-val">Reserve Bank of India (RBI)</span></div>
+      <div class="dil-item"><span class="dil-key">Exchange Regime</span><span class="dil-val">Managed Float</span></div>
+      <div class="dil-item"><span class="dil-key">Forex Reserves</span><span class="dil-val pos">$648.7 Bn (May 2025)</span></div>
+      <div class="dil-item"><span class="dil-key">Import Cover</span><span class="dil-val">~11 months</span></div>
+      <div class="dil-item"><span class="dil-key">Major Inflows</span><span class="dil-val">NRI Remittances · FDI · IT Exports</span></div>
+      <div class="dil-item"><span class="dil-key">Major Outflows</span><span class="dil-val">Crude Oil · Gold Imports · FPI</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">INR Trend Drivers</span></div>
+    <div class="detail-info-list">
+      <div class="dil-item"><span class="dil-key">Crude Oil Price</span><span class="dil-val">India imports ~85% of oil needs</span></div>
+      <div class="dil-item"><span class="dil-key">US Federal Reserve</span><span class="dil-val">USD strength inversely affects INR</span></div>
+      <div class="dil-item"><span class="dil-key">FPI Flows</span><span class="dil-val">Foreign portfolio investor movements</span></div>
+      <div class="dil-item"><span class="dil-key">RBI Intervention</span><span class="dil-val">RBI buys/sells USD to manage volatility</span></div>
+      <div class="dil-item"><span class="dil-key">Trade Deficit</span><span class="dil-val">Higher deficit = INR pressure</span></div>
+      <div class="dil-item"><span class="dil-key">Inflation Differential</span><span class="dil-val">Higher India inflation = INR depreciation</span></div>
+      <div class="dil-item"><span class="dil-key">NRI Remittances</span><span class="dil-val">$125 Bn/yr — world's largest</span></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+let curPeriod = "5d", curInterval = "15m", curChart = null;
+
+async function loadCurrency(force = false) {
+  const url  = "/api/currency" + (force ? "?force=1" : "");
+  const res  = await fetch(url);
+  const json = await res.json();
+  if (json.status !== "ok") return;
+  document.getElementById("curTs").textContent = json.ts;
+  const rates = json.data.rates;
+  const grid  = document.getElementById("currencyGrid");
+  grid.innerHTML = rates.map(r => {
+    const up  = (r.change_pct || 0) >= 0;
+    const price = r.price != null ? `₹${r.price.toFixed(4)}` : "–";
+    const chg   = r.change_pct != null ? `${up?"▲":"▼"} ${Math.abs(r.change_pct).toFixed(2)}%` : "–";
+    return `
+      <div class="currency-card ${up?"up":"down"}" onclick="selectPair('${r.symbol}','${r.name}')">
+        <div class="cc-flag">${r.flag}</div>
+        <div class="cc-name">${r.name}</div>
+        <div class="cc-price">${price}</div>
+        <div class="cc-chg ${up?"pos":"neg"}">${chg}</div>
+      </div>`;
+  }).join("");
+}
+
+function selectPair(sym, name) {
+  document.getElementById("pairSelect").value = sym;
+  document.getElementById("chartTitle").textContent = name + " — Historical";
+  loadChart();
+}
+
+async function loadChart() {
+  const sym = document.getElementById("pairSelect").value;
+  document.getElementById("chartTitle").textContent = sym.replace("=X","").replace("INR","/ INR") + " — Historical";
+  try {
+    const res  = await fetch(`/api/currency/history/${encodeURIComponent(sym)}?period=${curPeriod}&interval=${curInterval}`);
+    const json = await res.json();
+    if (json.status !== "ok") return;
+    const d = json.data;
+    if (curChart) curChart.destroy();
+    const isUp = d.closes.length > 1 && d.closes[d.closes.length-1] >= d.closes[0];
+    curChart = buildLineChart(
+      document.getElementById("currencyChart").getContext("2d"),
+      d.labels, d.closes, isUp ? "#22C55E" : "#EF4444"
+    );
+  } catch(e) { console.error(e); }
+}
+
+function setP(period, interval, btn) {
+  curPeriod = period; curInterval = interval;
+  document.querySelectorAll(".btn-period").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  loadChart();
+}
+
+async function refreshCurrency() {
+  const btn = document.getElementById("curRefreshBtn");
+  btn.textContent = "Refreshing...";
+  btn.disabled = true;
+  await loadCurrency(true);
+  await loadChart();
+  btn.textContent = "✓ Updated";
+  setTimeout(() => { btn.textContent = "↺ Refresh"; btn.disabled = false; }, 1500);
+}
+
+loadCurrency();
+loadChart();
+setInterval(loadCurrency, 5*60*1000);
+</script>
+{% endblock %}

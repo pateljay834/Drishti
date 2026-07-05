@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}DRISHTI — India Monitor{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- Ticker -->
+<div class="ticker-bar" id="tickerBar">
+  <div class="ticker-track" id="tickerTrack">
+    <span class="ticker-label">LIVE</span>
+    <span class="ticker-item loading">Fetching markets...</span>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <span class="logo-icon">&#127470;&#127475;</span>
+      <span class="logo-text">DRISHTI</span>
+      <span class="logo-v">v4</span>
+    </a>
+
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/"          class="nav-link {% if page=='dashboard' %}active{% endif %}">Dashboard</a></li>
+      <li><a href="/markets"   class="nav-link {% if page=='markets'   %}active{% endif %}">Markets</a></li>
+      <li><a href="/currency"  class="nav-link {% if page=='currency'  %}active{% endif %}">Currency</a></li>
+      <li><a href="/states"    class="nav-link {% if page=='states'    %}active{% endif %}">States</a></li>
+      <li class="nav-dropdown">
+        <a href="/news" class="nav-link {% if page=='news' %}active{% endif %}">
+          News &#9662;
+        </a>
+        <div class="nav-dropdown-menu">
+          <ul class="nav-dropdown-menu-inner">
+            <li><a href="/news"            class="nav-dropdown-item">All News</a></li>
+            <li><a href="/news?cat=business"      class="nav-dropdown-item">Business</a></li>
+            <li><a href="/news?cat=markets"       class="nav-dropdown-item">Markets</a></li>
+            <li><a href="/news?cat=politics"      class="nav-dropdown-item">Politics</a></li>
+            <li><a href="/news?cat=technology"    class="nav-dropdown-item">Technology</a></li>
+            <li><a href="/news?cat=sports"        class="nav-dropdown-item">Sports</a></li>
+            <li><a href="/news?cat=health"        class="nav-dropdown-item">Health</a></li>
+            <li><a href="/news?cat=science"       class="nav-dropdown-item">Science</a></li>
+            <li><a href="/news?cat=defence"       class="nav-dropdown-item">Defence</a></li>
+            <li><a href="/news?cat=environment"   class="nav-dropdown-item">Environment</a></li>
+            <li><a href="/news?cat=entertainment" class="nav-dropdown-item">Entertainment</a></li>
+            <li class="nav-dropdown-divider"></li>
+            <li><a href="/news/feeds"      class="nav-dropdown-item">&#9881; Manage Feeds</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+    <div class="nav-actions">
+      <!-- Global Search -->
+      <div class="nav-search">
+        <input type="text" id="globalSearch" class="global-search-input"
+               placeholder="Search..."
+               oninput="globalSearchRun(this.value)"
+               onfocus="showSearchPanel()"
+               onblur="hideSearchPanel()">
+        <div class="global-search-results" id="searchResults" style="display:none"></div>
+      </div>
+      <!-- Theme toggle -->
+      <button class="btn-icon" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
+        <span id="themeIcon">&#9790;</span>
+      </button>
+      <span class="ist-clock" id="istClock">IST --:--</span>
+      <a href="/settings" class="btn-icon {% if page=='settings' %}active{% endif %}" title="Settings">&#9881;</a>
+    </div>
+  </div>
+</nav>
+
+<main class="main">{% block content %}{% endblock %}</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-left">
+      <strong>DRISHTI v4</strong> &mdash; India Intelligence Platform &nbsp;|&nbsp;
+      MIT License &nbsp;|&nbsp;
+      <a href="/news/feeds" style="color:var(--t3)">Feed Manager</a> &nbsp;|&nbsp;
+      <a href="/api/health" target="_blank" style="color:var(--t3)">Health</a>
+    </div>
+    <div class="footer-right">
+      IMF &bull; World Bank &bull; NSE &bull; AMFI &bull; RBI &bull; MOSPI &bull; 88 RSS Feeds &nbsp;|&nbsp; {{ ts }}
+    </div>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

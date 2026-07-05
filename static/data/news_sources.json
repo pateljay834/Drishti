@@ -1,0 +1,1281 @@
+{
+  "_meta": {
+    "description": "DRISHTI News Feed Registry — edit this file or use /news/feeds to customise",
+    "how_to_update": "Edit directly in any text editor, or use the in-app Feed Manager which has a Test button to verify a URL before saving.",
+    "last_updated": "July 2025",
+    "categories": [
+      "national",
+      "business",
+      "markets",
+      "politics",
+      "technology",
+      "sports",
+      "health",
+      "science",
+      "defence",
+      "environment",
+      "entertainment",
+      "international",
+      "policy",
+      "regional"
+    ],
+    "languages": {
+      "en": "English",
+      "hi": "Hindi",
+      "mr": "Marathi",
+      "ta": "Tamil",
+      "ml": "Malayalam",
+      "kn": "Kannada",
+      "te": "Telugu",
+      "gu": "Gujarati",
+      "bn": "Bengali",
+      "or": "Odia",
+      "as": "Assamese",
+      "pa": "Punjabi",
+      "ur": "Urdu"
+    },
+    "note_on_regional_feeds": "Many regional-language newspaper RSS URLs change format periodically. Feeds marked enabled:false are unverified from this environment (network-sandboxed) — please Test them via /news/feeds before enabling. This is exactly why the Feed Manager has a live Test button: to keep this registry self-healing without needing a code update.",
+    "fields": {
+      "id": "unique slug",
+      "name": "display name",
+      "url": "RSS feed URL",
+      "category": "see categories above",
+      "language": "see languages above",
+      "enabled": "true/false",
+      "priority": "1-100 (higher = shown first)",
+      "icon": "2-5 char badge",
+      "description": "optional one-line note"
+    }
+  },
+  "national": [
+    {
+      "id": "economic_times",
+      "name": "Economic Times",
+      "url": "https://economictimes.indiatimes.com/rssfeedstopstories.cms",
+      "category": "business",
+      "language": "en",
+      "enabled": true,
+      "priority": 90,
+      "icon": "ET",
+      "description": "India's top financial daily"
+    },
+    {
+      "id": "et_markets",
+      "name": "ET Markets",
+      "url": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
+      "category": "markets",
+      "language": "en",
+      "enabled": true,
+      "priority": 88,
+      "icon": "ETM",
+      "description": "ET dedicated markets feed"
+    },
+    {
+      "id": "the_hindu",
+      "name": "The Hindu",
+      "url": "https://www.thehindu.com/news/national/feeder/default.rss",
+      "category": "national",
+      "language": "en",
+      "enabled": true,
+      "priority": 85,
+      "icon": "TH",
+      "description": "National affairs"
+    },
+    {
+      "id": "hindu_business",
+      "name": "Hindu Business Line",
+      "url": "https://www.thehindubusinessline.com/feeder/default.rss",
+      "category": "business",
+      "language": "en",
+      "enabled": true,
+      "priority": 80,
+      "icon": "HBL",
+      "description": "Business and economy"
+    },
+    {
+      "id": "hindu_intl",
+      "name": "The Hindu — World",
+      "url": "https://www.thehindu.com/news/international/feeder/default.rss",
+      "category": "international",
+      "language": "en",
+      "enabled": true,
+      "priority": 72,
+      "icon": "THW",
+      "description": "India in the world"
+    },
+    {
+      "id": "ndtv_top",
+      "name": "NDTV",
+      "url": "https://feeds.feedburner.com/ndtvnews-top-stories",
+      "category": "national",
+      "language": "en",
+      "enabled": true,
+      "priority": 83,
+      "icon": "NDTV",
+      "description": "Top stories"
+    },
+    {
+      "id": "mint",
+      "name": "Livemint",
+      "url": "https://www.livemint.com/rss/news",
+      "category": "business",
+      "language": "en",
+      "enabled": true,
+      "priority": 82,
+      "icon": "MINT",
+      "description": "Financial news"
+    },
+    {
+      "id": "business_standard",
+      "name": "Business Standard",
+      "url": "https://www.business-standard.com/rss/home_page_top_stories.rss",
+      "category": "business",
+      "language": "en",
+      "enabled": true,
+      "priority": 78,
+      "icon": "BS",
+      "description": "Top business stories"
+    },
+    {
+      "id": "pib",
+      "name": "PIB — Govt of India",
+      "url": "https://pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3",
+      "category": "policy",
+      "language": "en",
+      "enabled": true,
+      "priority": 75,
+      "icon": "PIB",
+      "description": "Official government press releases"
+    },
+    {
+      "id": "moneycontrol",
+      "name": "Moneycontrol",
+      "url": "https://www.moneycontrol.com/rss/latestnews.xml",
+      "category": "markets",
+      "language": "en",
+      "enabled": true,
+      "priority": 82,
+      "icon": "MC",
+      "description": "Markets and personal finance"
+    },
+    {
+      "id": "indian_express",
+      "name": "Indian Express",
+      "url": "https://indianexpress.com/feed/",
+      "category": "national",
+      "language": "en",
+      "enabled": true,
+      "priority": 80,
+      "icon": "IE",
+      "description": "National and political coverage"
+    },
+    {
+      "id": "hindustan_times",
+      "name": "Hindustan Times",
+      "url": "https://www.hindustantimes.com/feeds/rss/india/rssfeed.xml",
+      "category": "national",
+      "language": "en",
+      "enabled": true,
+      "priority": 78,
+      "icon": "HT",
+      "description": "National news"
+    },
+    {
+      "id": "toi_top",
+      "name": "Times of India",
+      "url": "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
+      "category": "national",
+      "language": "en",
+      "enabled": true,
+      "priority": 77,
+      "icon": "TOI",
+      "description": "Top stories from TOI"
+    },
+    {
+      "id": "the_wire",
+      "name": "The Wire",
+      "url": "https://thewire.in/feed",
+      "category": "politics",
+      "language": "en",
+      "enabled": true,
+      "priority": 72,
+      "icon": "WIRE",
+      "description": "Investigative and political"
+    },
+    {
+      "id": "the_print",
+      "name": "The Print",
+      "url": "https://theprint.in/feed/",
+      "category": "politics",
+      "language": "en",
+      "enabled": true,
+      "priority": 73,
+      "icon": "PRNT",
+      "description": "Policy and politics"
+    },
+    {
+      "id": "scroll_in",
+      "name": "Scroll.in",
+      "url": "https://scroll.in/feed",
+      "category": "national",
+      "language": "en",
+      "enabled": true,
+      "priority": 70,
+      "icon": "SCR",
+      "description": "Long-form journalism"
+    },
+    {
+      "id": "inc42",
+      "name": "Inc42",
+      "url": "https://inc42.com/feed/",
+      "category": "technology",
+      "language": "en",
+      "enabled": true,
+      "priority": 75,
+      "icon": "I42",
+      "description": "Indian startups and tech"
+    },
+    {
+      "id": "ndtv_sports",
+      "name": "NDTV Sports",
+      "url": "https://feeds.feedburner.com/ndtvsports-latest",
+      "category": "sports",
+      "language": "en",
+      "enabled": true,
+      "priority": 72,
+      "icon": "NDS",
+      "description": "Cricket, football, Olympics"
+    },
+    {
+      "id": "ndtv_health",
+      "name": "NDTV Health",
+      "url": "https://www.ndtv.com/health/rss",
+      "category": "health",
+      "language": "en",
+      "enabled": true,
+      "priority": 68,
+      "icon": "NDH",
+      "description": "Health and medicine"
+    },
+    {
+      "id": "down_to_earth",
+      "name": "Down to Earth",
+      "url": "https://www.downtoearth.org.in/rss/",
+      "category": "environment",
+      "language": "en",
+      "enabled": true,
+      "priority": 68,
+      "icon": "DTE",
+      "description": "Environment and climate"
+    },
+    {
+      "id": "financial_express",
+      "name": "Financial Express",
+      "url": "https://www.financialexpress.com/feed/",
+      "category": "business",
+      "language": "en",
+      "enabled": true,
+      "priority": 74,
+      "icon": "FE",
+      "description": "Finance and economy"
+    },
+    {
+      "id": "pib_science",
+      "name": "PIB — Science & Tech",
+      "url": "https://pib.gov.in/RssMain.aspx?ModId=18&Lang=1&Regid=3",
+      "category": "science",
+      "language": "en",
+      "enabled": true,
+      "priority": 65,
+      "icon": "PBS",
+      "description": "Govt science and tech releases"
+    },
+    {
+      "id": "pib_defence",
+      "name": "PIB — Defence",
+      "url": "https://pib.gov.in/RssMain.aspx?ModId=3&Lang=1&Regid=3",
+      "category": "defence",
+      "language": "en",
+      "enabled": true,
+      "priority": 68,
+      "icon": "PBD",
+      "description": "Ministry of Defence releases"
+    },
+    {
+      "id": "jagran_national",
+      "name": "Dainik Jagran",
+      "url": "https://www.jagran.com/rss/news-national.xml",
+      "category": "national",
+      "language": "hi",
+      "enabled": true,
+      "priority": 78,
+      "icon": "JAG",
+      "description": "India's largest Hindi daily — national desk"
+    },
+    {
+      "id": "bhaskar_national",
+      "name": "Dainik Bhaskar",
+      "url": "https://www.bhaskar.com/rss-feed/1061/",
+      "category": "national",
+      "language": "hi",
+      "enabled": true,
+      "priority": 76,
+      "icon": "DB",
+      "description": "largest Hindi circulation"
+    },
+    {
+      "id": "amar_ujala",
+      "name": "Amar Ujala",
+      "url": "https://www.amarujala.com/rss/national.xml",
+      "category": "national",
+      "language": "hi",
+      "enabled": true,
+      "priority": 74,
+      "icon": "AU",
+      "description": "major Hindi daily"
+    }
+  ],
+  "states": {
+    "maharashtra": [
+      {
+        "id": "mh_mht",
+        "name": "Maharashtra Times",
+        "url": "https://maharashtratimes.com/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "mr",
+        "enabled": true,
+        "priority": 80,
+        "icon": "MHT",
+        "description": "Marathi — top Maharashtra news"
+      },
+      {
+        "id": "mh_lokmat",
+        "name": "Lokmat",
+        "url": "https://www.lokmat.com/rss/maharashtra.xml",
+        "category": "regional",
+        "language": "mr",
+        "enabled": true,
+        "priority": 78,
+        "icon": "LKM",
+        "description": "largest Marathi daily"
+      },
+      {
+        "id": "mh_loksatta",
+        "name": "Loksatta",
+        "url": "https://www.loksatta.com/feed/",
+        "category": "regional",
+        "language": "mr",
+        "enabled": true,
+        "priority": 76,
+        "icon": "LKS",
+        "description": "Marathi quality daily"
+      },
+      {
+        "id": "mh_midday",
+        "name": "Mid-Day Mumbai",
+        "url": "https://www.mid-day.com/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "MDM",
+        "description": "Mumbai city news, English"
+      },
+      {
+        "id": "mh_ie_mum",
+        "name": "IE Mumbai",
+        "url": "https://indianexpress.com/section/cities/mumbai/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 70,
+        "icon": "IEM",
+        "description": "Indian Express Mumbai edition, English"
+      }
+    ],
+    "delhi": [
+      {
+        "id": "dl_ht",
+        "name": "HT Delhi",
+        "url": "https://www.hindustantimes.com/feeds/rss/delhi/rssfeed.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "HTD",
+        "description": "Delhi city news, English"
+      },
+      {
+        "id": "dl_toi",
+        "name": "TOI Delhi",
+        "url": "https://timesofindia.indiatimes.com/city/delhi/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 78,
+        "icon": "TOD",
+        "description": "Delhi edition TOI, English"
+      },
+      {
+        "id": "dl_jagran",
+        "name": "Jagran Delhi",
+        "url": "https://www.jagran.com/rss/news-delhi.xml",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 75,
+        "icon": "JGD",
+        "description": "Delhi desk, Hindi"
+      }
+    ],
+    "karnataka": [
+      {
+        "id": "ka_dh",
+        "name": "Deccan Herald",
+        "url": "https://www.deccanherald.com/rss/top-national-news.rss",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "DH",
+        "description": "Bengaluru-based national daily, English"
+      },
+      {
+        "id": "ka_pv",
+        "name": "Prajavani",
+        "url": "https://www.prajavani.net/rss.xml",
+        "category": "regional",
+        "language": "kn",
+        "enabled": true,
+        "priority": 78,
+        "icon": "PJV",
+        "description": "leading Kannada daily"
+      },
+      {
+        "id": "ka_vk",
+        "name": "Vijay Karnataka",
+        "url": "https://vijaykarnataka.com/rss.cms",
+        "category": "regional",
+        "language": "kn",
+        "enabled": true,
+        "priority": 76,
+        "icon": "VJK",
+        "description": "widely-read Kannada daily"
+      },
+      {
+        "id": "ka_nie",
+        "name": "New Indian Express",
+        "url": "https://www.newindianexpress.com/states/karnataka/rssfeed.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "NIE",
+        "description": "Karnataka edition, English"
+      }
+    ],
+    "tamil_nadu": [
+      {
+        "id": "tn_nie",
+        "name": "New Indian Express TN",
+        "url": "https://www.newindianexpress.com/states/tamil-nadu/rssfeed.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "NIE",
+        "description": "Tamil Nadu news, English"
+      },
+      {
+        "id": "tn_dinamani",
+        "name": "Dinamani",
+        "url": "https://www.dinamani.com/rss.xml",
+        "category": "regional",
+        "language": "ta",
+        "enabled": true,
+        "priority": 78,
+        "icon": "DNM",
+        "description": "Tamil daily (IE group)"
+      },
+      {
+        "id": "tn_dinamalar",
+        "name": "Dinamalar",
+        "url": "https://www.dinamalar.com/rss/latest_news.asp",
+        "category": "regional",
+        "language": "ta",
+        "enabled": true,
+        "priority": 76,
+        "icon": "DML",
+        "description": "major Tamil daily"
+      },
+      {
+        "id": "tn_hindu_tamil",
+        "name": "The Hindu Tamil",
+        "url": "https://tamil.thehindu.com/rss/rssfeed.xml",
+        "category": "regional",
+        "language": "ta",
+        "enabled": true,
+        "priority": 75,
+        "icon": "HDT",
+        "description": "Hindu Group Tamil edition"
+      }
+    ],
+    "kerala": [
+      {
+        "id": "kl_mano",
+        "name": "Mathrubhumi",
+        "url": "https://www.mathrubhumi.com/rss",
+        "category": "regional",
+        "language": "ml",
+        "enabled": true,
+        "priority": 82,
+        "icon": "MBM",
+        "description": "Leading Malayalam daily"
+      },
+      {
+        "id": "kl_manorama",
+        "name": "Malayala Manorama",
+        "url": "https://www.manoramaonline.com/rss/latest-news.xml",
+        "category": "regional",
+        "language": "ml",
+        "enabled": true,
+        "priority": 80,
+        "icon": "MRM",
+        "description": "largest Malayalam daily"
+      },
+      {
+        "id": "kl_nie",
+        "name": "New Indian Express KL",
+        "url": "https://www.newindianexpress.com/states/kerala/rssfeed.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "NIK",
+        "description": "Kerala news in English"
+      }
+    ],
+    "telangana": [
+      {
+        "id": "ts_tt",
+        "name": "Telangana Today",
+        "url": "https://telanganatoday.com/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 82,
+        "icon": "TT",
+        "description": "State's own daily, English"
+      },
+      {
+        "id": "ts_eenadu",
+        "name": "Eenadu",
+        "url": "https://www.eenadu.net/rss",
+        "category": "regional",
+        "language": "te",
+        "enabled": true,
+        "priority": 80,
+        "icon": "EEN",
+        "description": "largest Telugu daily"
+      },
+      {
+        "id": "ts_sakshi",
+        "name": "Sakshi",
+        "url": "https://www.sakshi.com/rss.xml",
+        "category": "regional",
+        "language": "te",
+        "enabled": true,
+        "priority": 78,
+        "icon": "SAK",
+        "description": "major Telugu daily"
+      },
+      {
+        "id": "ts_hans",
+        "name": "The Hans India",
+        "url": "https://www.thehansindia.com/rss",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 70,
+        "icon": "HI",
+        "description": "Hyderabad news, English"
+      }
+    ],
+    "andhra_pradesh": [
+      {
+        "id": "ap_eenadu",
+        "name": "Eenadu AP",
+        "url": "https://www.eenadu.net/rss",
+        "category": "regional",
+        "language": "te",
+        "enabled": true,
+        "priority": 80,
+        "icon": "EEN",
+        "description": "largest Telugu daily"
+      },
+      {
+        "id": "ap_sakshi",
+        "name": "Sakshi AP",
+        "url": "https://www.sakshi.com/rss.xml",
+        "category": "regional",
+        "language": "te",
+        "enabled": true,
+        "priority": 78,
+        "icon": "SAK",
+        "description": "major Telugu daily"
+      },
+      {
+        "id": "ap_hans",
+        "name": "Hans India AP",
+        "url": "https://www.thehansindia.com/andhra-pradesh/rss",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 76,
+        "icon": "HIA",
+        "description": "Andhra Pradesh news, English"
+      }
+    ],
+    "west_bengal": [
+      {
+        "id": "wb_tele",
+        "name": "The Telegraph India",
+        "url": "https://www.telegraphindia.com/feeds/rss.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 82,
+        "icon": "TGI",
+        "description": "Kolkata-based national quality daily, English"
+      },
+      {
+        "id": "wb_abp",
+        "name": "Anandabazar Patrika",
+        "url": "https://www.anandabazar.com/rss.xml",
+        "category": "regional",
+        "language": "bn",
+        "enabled": true,
+        "priority": 80,
+        "icon": "ABP",
+        "description": "largest Bengali daily"
+      },
+      {
+        "id": "wb_ei",
+        "name": "Ei Samay",
+        "url": "https://eisamay.com/feeds/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "bn",
+        "enabled": true,
+        "priority": 74,
+        "icon": "EIS",
+        "description": "Bengali — Times Group Kolkata"
+      }
+    ],
+    "gujarat": [
+      {
+        "id": "gj_samachar",
+        "name": "Gujarat Samachar",
+        "url": "https://www.gujaratsamachar.com/rss/top-stories",
+        "category": "regional",
+        "language": "gu",
+        "enabled": true,
+        "priority": 78,
+        "icon": "GJS",
+        "description": "largest Gujarati daily"
+      },
+      {
+        "id": "gj_toi",
+        "name": "TOI Ahmedabad",
+        "url": "https://timesofindia.indiatimes.com/city/ahmedabad/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 75,
+        "icon": "TOA",
+        "description": "TOI Ahmedabad desk, English"
+      },
+      {
+        "id": "custom_1782957423",
+        "name": "મારું ગુજરાત | દિવ્ય ભાસ્કર",
+        "url": "https://www.divyabhaskar.co.in/rss-v1--category-1035.xml",
+        "category": "regional",
+        "language": "gu",
+        "enabled": true,
+        "priority": 75,
+        "icon": "DB",
+        "description": ""
+      },
+      {
+        "id": "custom_1782960498",
+        "name": "SANDESH | RSS",
+        "url": "https://sandesh.com/rss/ahmedabad-city.xml",
+        "category": "regional",
+        "language": "gu",
+        "enabled": true,
+        "priority": 75,
+        "icon": "Sande",
+        "description": ""
+      },
+      {
+        "id": "custom_1783242690",
+        "name": "Latest Videos",
+        "url": "https://www.tak.live/rss/gujarat-tak/video.xml",
+        "category": "regional",
+        "language": "gu",
+        "enabled": true,
+        "priority": 70,
+        "icon": "LAT",
+        "description": ""
+      }
+    ],
+    "rajasthan": [
+      {
+        "id": "rj_pat",
+        "name": "Rajasthan Patrika",
+        "url": "https://www.patrika.com/rss/rajasthan-news.xml",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 80,
+        "icon": "PAT",
+        "description": "Leading Rajasthan daily, Hindi"
+      },
+      {
+        "id": "rj_toi",
+        "name": "TOI Jaipur",
+        "url": "https://timesofindia.indiatimes.com/city/jaipur/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "TOJ",
+        "description": "TOI Jaipur edition, English"
+      }
+    ],
+    "punjab": [
+      {
+        "id": "pb_trib",
+        "name": "Tribune India",
+        "url": "https://www.tribuneindia.com/rss/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 82,
+        "icon": "TBI",
+        "description": "Chandigarh-based — covers Punjab & Haryana, English"
+      },
+      {
+        "id": "pb_ajit",
+        "name": "Ajit Jalandhar",
+        "url": "https://www.ajitjalandhar.com/rss/punjab.xml",
+        "category": "regional",
+        "language": "pa",
+        "enabled": true,
+        "priority": 78,
+        "icon": "AJT",
+        "description": "leading Punjabi daily"
+      },
+      {
+        "id": "pb_jagbani",
+        "name": "Jagbani",
+        "url": "https://www.jagbani.com/rss/punjab",
+        "category": "regional",
+        "language": "pa",
+        "enabled": true,
+        "priority": 76,
+        "icon": "JGB",
+        "description": "Punjabi daily (Jagran group)"
+      }
+    ],
+    "haryana": [
+      {
+        "id": "hr_trib",
+        "name": "Tribune India",
+        "url": "https://www.tribuneindia.com/rss/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "TBI",
+        "description": "Covers Haryana and Chandigarh, English"
+      },
+      {
+        "id": "hr_jagran",
+        "name": "Jagran Haryana",
+        "url": "https://www.jagran.com/haryana/rss.xml",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 75,
+        "icon": "JGH",
+        "description": "Haryana desk, Hindi"
+      }
+    ],
+    "uttar_pradesh": [
+      {
+        "id": "up_jagran",
+        "name": "Dainik Jagran UP",
+        "url": "https://www.jagran.com/rss/news-uttar-pradesh.xml",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 80,
+        "icon": "JAG",
+        "description": "Leading Hindi daily — UP focus"
+      },
+      {
+        "id": "up_ht",
+        "name": "HT Lucknow",
+        "url": "https://www.hindustantimes.com/feeds/rss/lucknow/rssfeed.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 75,
+        "icon": "HTL",
+        "description": "HT Lucknow edition, English"
+      },
+      {
+        "id": "up_toi",
+        "name": "TOI Lucknow",
+        "url": "https://timesofindia.indiatimes.com/city/lucknow/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "TOL",
+        "description": "TOI Lucknow desk, English"
+      }
+    ],
+    "madhya_pradesh": [
+      {
+        "id": "mp_pat",
+        "name": "MP Patrika",
+        "url": "https://www.patrika.com/rss/madhya-pradesh-news.xml",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 78,
+        "icon": "MPP",
+        "description": "Patrika MP edition, Hindi"
+      },
+      {
+        "id": "mp_toi",
+        "name": "TOI Bhopal",
+        "url": "https://timesofindia.indiatimes.com/city/bhopal/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "TOB",
+        "description": "TOI Bhopal desk, English"
+      }
+    ],
+    "chhattisgarh": [
+      {
+        "id": "cg_pat",
+        "name": "CG Patrika",
+        "url": "https://www.patrika.com/rss/chhattisgarh-news.xml",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 78,
+        "icon": "CGP",
+        "description": "Patrika Chhattisgarh edition, Hindi"
+      }
+    ],
+    "odisha": [
+      {
+        "id": "od_tv",
+        "name": "Odisha TV",
+        "url": "https://odishatv.in/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "OTV",
+        "description": "Leading Odisha news channel, English"
+      },
+      {
+        "id": "od_sambad",
+        "name": "Sambad",
+        "url": "https://sambad.in/feed/",
+        "category": "regional",
+        "language": "or",
+        "enabled": true,
+        "priority": 78,
+        "icon": "SMB",
+        "description": "largest Odia daily"
+      },
+      {
+        "id": "od_bytes",
+        "name": "Odisha Bytes",
+        "url": "https://odishabytes.com/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "OB",
+        "description": "Odisha digital news, English"
+      }
+    ],
+    "jharkhand": [
+      {
+        "id": "jh_pra",
+        "name": "Prabhat Khabar",
+        "url": "https://www.prabhatkhabar.com/feed",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 78,
+        "icon": "PKH",
+        "description": "Covers Jharkhand and Bihar, Hindi"
+      }
+    ],
+    "bihar": [
+      {
+        "id": "br_pra",
+        "name": "Prabhat Khabar",
+        "url": "https://www.prabhatkhabar.com/feed",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 78,
+        "icon": "PKH",
+        "description": "Major Bihar-Jharkhand daily, Hindi"
+      },
+      {
+        "id": "br_toi",
+        "name": "TOI Patna",
+        "url": "https://timesofindia.indiatimes.com/city/patna/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 70,
+        "icon": "TOP",
+        "description": "TOI Patna desk, English"
+      }
+    ],
+    "assam": [
+      {
+        "id": "as_sent",
+        "name": "The Sentinel Assam",
+        "url": "https://www.sentinelassam.com/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "SNT",
+        "description": "Guwahati-based quality daily, English"
+      },
+      {
+        "id": "as_pratidin",
+        "name": "Asomiya Pratidin",
+        "url": "https://www.asomiyapratidin.in/feed/",
+        "category": "regional",
+        "language": "as",
+        "enabled": true,
+        "priority": 78,
+        "icon": "ASP",
+        "description": "leading Assamese daily"
+      },
+      {
+        "id": "as_net",
+        "name": "Northeast Today",
+        "url": "https://www.northeasttoday.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "NET",
+        "description": "Covers all 8 NE states, English"
+      }
+    ],
+    "arunachal_pradesh": [
+      {
+        "id": "ar_net",
+        "name": "Northeast Today",
+        "url": "https://www.northeasttoday.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 78,
+        "icon": "NET",
+        "description": "Covers Arunachal news, English"
+      }
+    ],
+    "nagaland": [
+      {
+        "id": "nl_net",
+        "name": "Northeast Today",
+        "url": "https://www.northeasttoday.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 78,
+        "icon": "NET",
+        "description": "Covers Nagaland news, English"
+      },
+      {
+        "id": "nl_mor",
+        "name": "Morung Express",
+        "url": "https://morungexpress.com/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 75,
+        "icon": "MOR",
+        "description": "Nagaland's own daily, English"
+      }
+    ],
+    "meghalaya": [
+      {
+        "id": "ml_net",
+        "name": "Northeast Today",
+        "url": "https://www.northeasttoday.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 78,
+        "icon": "NET",
+        "description": "Covers Meghalaya, English"
+      }
+    ],
+    "manipur": [
+      {
+        "id": "mn_epao",
+        "name": "E-Pao Manipur",
+        "url": "https://e-pao.net/RSS/epao.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "EPA",
+        "description": "Manipur's own digital news portal, English"
+      },
+      {
+        "id": "mn_net",
+        "name": "Northeast Today",
+        "url": "https://www.northeasttoday.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "NET",
+        "description": "Covers Manipur news, English"
+      }
+    ],
+    "mizoram": [
+      {
+        "id": "mz_net",
+        "name": "Northeast Today",
+        "url": "https://www.northeasttoday.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 78,
+        "icon": "NET",
+        "description": "Covers Mizoram, English"
+      }
+    ],
+    "tripura": [
+      {
+        "id": "tr_net",
+        "name": "Northeast Today",
+        "url": "https://www.northeasttoday.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 78,
+        "icon": "NET",
+        "description": "Covers Tripura, English"
+      }
+    ],
+    "sikkim": [
+      {
+        "id": "sk_net",
+        "name": "Northeast Today",
+        "url": "https://www.northeasttoday.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 78,
+        "icon": "NET",
+        "description": "Covers Sikkim, English"
+      }
+    ],
+    "uttarakhand": [
+      {
+        "id": "uk_trib",
+        "name": "Tribune India",
+        "url": "https://www.tribuneindia.com/rss/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "TBI",
+        "description": "Covers Uttarakhand, English"
+      },
+      {
+        "id": "uk_jagran",
+        "name": "Jagran Uttarakhand",
+        "url": "https://www.jagran.com/uttarakhand/rss.xml",
+        "category": "regional",
+        "language": "hi",
+        "enabled": true,
+        "priority": 74,
+        "icon": "JGU",
+        "description": "Uttarakhand desk, Hindi"
+      }
+    ],
+    "himachal_pradesh": [
+      {
+        "id": "hp_trib",
+        "name": "Tribune India",
+        "url": "https://www.tribuneindia.com/rss/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 75,
+        "icon": "TBI",
+        "description": "Tribune covers HP from Chandigarh, English"
+      },
+      {
+        "id": "hp_ht",
+        "name": "HT Shimla",
+        "url": "https://www.hindustantimes.com/feeds/rss/himachal-pradesh/rssfeed.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 70,
+        "icon": "HHS",
+        "description": "HT Himachal desk, English"
+      }
+    ],
+    "goa": [
+      {
+        "id": "ga_her",
+        "name": "Herald Goa",
+        "url": "https://www.herald.goa.in/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "HGL",
+        "description": "Goa's oldest English daily"
+      }
+    ],
+    "jammu_kashmir": [
+      {
+        "id": "jk_gk",
+        "name": "Greater Kashmir",
+        "url": "https://www.greaterkashmir.com/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 82,
+        "icon": "GK",
+        "description": "J&K's premier English daily"
+      },
+      {
+        "id": "jk_ko",
+        "name": "Kashmir Observer",
+        "url": "https://kashmirobserver.net/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 75,
+        "icon": "KO",
+        "description": "Independent J&K news, English"
+      }
+    ],
+    "ladakh": [
+      {
+        "id": "la_gk",
+        "name": "Greater Kashmir",
+        "url": "https://www.greaterkashmir.com/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 78,
+        "icon": "GK",
+        "description": "Covers Ladakh news, English"
+      }
+    ],
+    "chandigarh": [
+      {
+        "id": "ch_trib",
+        "name": "Tribune India",
+        "url": "https://www.tribuneindia.com/rss/feed",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 85,
+        "icon": "TBI",
+        "description": "Tribune HQ is in Chandigarh, English"
+      },
+      {
+        "id": "ch_ht",
+        "name": "HT Chandigarh",
+        "url": "https://www.hindustantimes.com/feeds/rss/chandigarh/rssfeed.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 80,
+        "icon": "HTC",
+        "description": "HT Chandigarh edition, English"
+      }
+    ],
+    "puducherry": [
+      {
+        "id": "py_nie",
+        "name": "New Indian Express PY",
+        "url": "https://www.newindianexpress.com/states/tamil-nadu/rssfeed.xml",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 72,
+        "icon": "NIY",
+        "description": "Covers Puducherry via TN feed, English"
+      }
+    ],
+    "andaman_nicobar": [
+      {
+        "id": "an_toi",
+        "name": "TOI — Islands",
+        "url": "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 65,
+        "icon": "TOI",
+        "description": "No local RSS available — national feed"
+      }
+    ],
+    "lakshadweep": [
+      {
+        "id": "ld_ie",
+        "name": "Indian Express",
+        "url": "https://indianexpress.com/feed/",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 65,
+        "icon": "IE",
+        "description": "No local RSS available — national feed"
+      }
+    ],
+    "dadra_nagar_haveli": [
+      {
+        "id": "dd_gj",
+        "name": "TOI Ahmedabad",
+        "url": "https://timesofindia.indiatimes.com/city/ahmedabad/rssfeedstopstories.cms",
+        "category": "regional",
+        "language": "en",
+        "enabled": true,
+        "priority": 65,
+        "icon": "TOA",
+        "description": "Nearest major edition, English"
+      }
+    ]
+  }
+}

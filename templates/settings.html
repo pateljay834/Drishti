@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %}DRISHTI — Settings{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">Configure DRISHTI v3 — all settings stored locally in config.json</p>
+    </div>
+  </div>
+</div>
+
+<div class="settings-grid">
+
+  <!-- App Settings -->
+  <div class="card settings-card">
+    <div class="card-header"><span class="card-title">Application</span></div>
+    <div class="settings-form">
+      <div class="setting-row">
+        <label class="setting-label">Port Number</label>
+        <input type="number" id="settPort" class="setting-input" value="{{ config.port }}" min="1024" max="65535">
+        <span class="setting-hint">Requires restart</span>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Cache TTL (min)</label>
+        <input type="number" id="settCacheTtl" class="setting-input" value="{{ config.cache_ttl_minutes }}" min="1" max="240">
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Markets Refresh (min)</label>
+        <input type="number" id="settMktRefresh" class="setting-input" value="{{ config.markets_refresh_minutes }}" min="1" max="60">
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">News Refresh (min)</label>
+        <input type="number" id="settNewsRefresh" class="setting-input" value="{{ config.news_refresh_minutes }}" min="5" max="120">
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Theme</label>
+        <div class="btn-group">
+          <button class="btn-period" onclick="applyTheme('dark');this.classList.add('active');this.nextSibling.classList.remove('active')">Dark</button>
+          <button class="btn-period" onclick="applyTheme('light');this.classList.remove('active');this.nextSibling?.classList.add('active')">Light</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scheduler Status -->
+  <div class="card settings-card">
+    <div class="card-header">
+      <span class="card-title">Background Scheduler</span>
+      <span class="badge badge-live" id="schedBadge">Checking...</span>
+    </div>
+    <div id="schedStatus"><div class="skeleton-block"></div></div>
+    <div style="padding:0.75rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap">
+      <button class="btn-refresh" onclick="triggerJob('markets')">↺ Markets</button>
+      <button class="btn-refresh" onclick="triggerJob('news')">↺ News</button>
+      <button class="btn-refresh" onclick="triggerJob('currency')">↺ Currency</button>
+    </div>
+  </div>
+
+  <!-- News Feeds -->
+  <div class="card settings-card" id="news-feeds">
+    <div class="card-header">
+      <span class="card-title">News Feeds</span>
+      <span class="badge badge-gray" id="feedCountBadge">88 feeds</span>
+    </div>
+    <div class="settings-form">
+      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:0.5rem">
+        <p style="font-size:12px;color:var(--t2);line-height:1.6">
+          DRISHTI ships with 27 national feeds (across 13 categories) and 61 state-specific
+          regional feeds covering all 36 states/UTs. Add, edit, test, enable/disable or delete
+          any feed from the full Feed Manager.
+        </p>
+        <a href="/news/feeds" class="btn-primary" style="text-decoration:none;display:inline-block">
+          Open Feed Manager &#8594;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cache & Data -->
+  <div class="card settings-card">
+    <div class="card-header"><span class="card-title">Cache &amp; Data</span></div>
+    <div class="settings-form">
+      <div class="setting-row">
+        <label class="setting-label">Clear All Cache</label>
+        <button class="btn-danger-sm" onclick="clearCache()">Clear Cache</button>
+        <span class="setting-hint">Forces fresh API fetch</span>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label">Reload State Data</label>
+        <button class="btn-refresh" onclick="reloadStates()">Reload JSON</button>
+        <span class="setting-hint">Picks up states_data.json edits</span>
+      </div>
+      <div class="setting-row" id="cacheStats">
+        <label class="setting-label">Cache Size</label>
+        <span class="setting-hint" id="cacheSizeText">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Sources Info -->
+  <div class="card settings-card">
+    <div class="card-header"><span class="card-title">Data Sources (All Free)</span></div>
+    <div class="settings-form">
+      {% set sources_info = [
+        ("Markets","yfinance (Yahoo Finance)","NSE/BSE indices, stocks — ~15min delayed, genuinely live"),
+        ("Currency","yfinance","INR vs 7 major pairs — ~15min delayed, genuinely live"),
+        ("News","103 RSS Feeds","27 national + 76 state-specific, 12 languages"),
+        ("States","states_data.json","Local reference facts only — no economic claims"),
+      ] %}
+      {% for name, provider, note in sources_info %}
+      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:0.2rem">
+        <div style="display:flex;justify-content:space-between;width:100%">
+          <span class="setting-label">{{ name }}</span>
+          <span style="font-size:11px;color:var(--saffron);font-family:var(--font-m)">{{ provider }}</span>
+        </div>
+        <span class="setting-hint">{{ note }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- About -->
+  <div class="card settings-card">
+    <div class="card-header"><span class="card-title">About DRISHTI</span></div>
+    <div class="settings-form">
+      <div class="about-block">
+        <div class="about-logo">DRISHTI <span>v3.0</span></div>
+        <p class="about-desc">Open-source India news &amp; markets platform — a genuinely live
+        market ticker and currency dashboard, plus 103 RSS feeds spanning national and
+        state-specific news in 12 languages. No hardcoded numbers dressed up as live data.</p>
+        <div class="about-links">
+          <span class="about-tag">MIT License</span>
+          <span class="about-tag">Open Source</span>
+          <span class="about-tag">No Ads</span>
+          <span class="about-tag">No API Keys</span>
+          <span class="about-tag">103 RSS Feeds</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="settings-footer">
+  <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+  <span class="save-msg" id="saveMsg"></span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Scheduler status ──────────────────────────────────────────────
+async function loadSchedulerStatus() {
+  try {
+    const res  = await fetch("/api/scheduler/status");
+    const json = await res.json();
+    if (json.status !== "ok") return;
+    const d    = json.data;
+    const badge = document.getElementById("schedBadge");
+    if (badge) {
+      badge.textContent = d.running ? "RUNNING" : "STOPPED";
+      badge.className   = d.running ? "badge badge-live" : "badge badge-gray";
+    }
+    const el = document.getElementById("schedStatus");
+    if (!el) return;
+    el.innerHTML = Object.entries(d.jobs || {}).map(([id, j]) => `
+      <div class="sched-row">
+        <div>
+          <div class="sched-name">${j.name || id}</div>
+          <div class="sched-meta">Next: ${j.next_run || "N/A"}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="${j.status==="ok"?"sched-ok":"sched-err"}">
+            ${j.status==="ok" ? "&#10003; OK" : j.status==="error" ? "&#10007; Error" : "Pending"}
+          </div>
+          <div class="sched-meta">${j.last_run || "Never"}</div>
+        </div>
+      </div>`).join("") || "<div class='setting-row'><span class='text-muted'>No jobs running</span></div>";
+  } catch(e) { console.error("Scheduler status error:", e); }
+}
+
+async function triggerJob(jobId) {
+  try {
+    const res  = await fetch(`/api/scheduler/run/${jobId}`, {method:"POST"});
+    const json = await res.json();
+    alert(json.status === "ok" ? `Job '${jobId}' triggered. Data refreshing...` : `Error: ${json.message}`);
+    setTimeout(loadSchedulerStatus, 2000);
+  } catch(e) { alert("Error triggering job: " + e); }
+}
+
+// ── Cache stats ───────────────────────────────────────────────────
+async function loadCacheStats() {
+  try {
+    const res  = await fetch("/api/cache/stats");
+    const json = await res.json();
+    if (json.status === "ok") {
+      document.getElementById("cacheSizeText").textContent =
+        `${json.data.files} files · ${json.data.size_kb} KB`;
+    }
+  } catch {}
+}
+
+// ── Save settings ─────────────────────────────────────────────────
+async function saveSettings() {
+  const msg    = document.getElementById("saveMsg");
+  const payload = {
+    port:                     parseInt(document.getElementById("settPort").value),
+    cache_ttl_minutes:        parseInt(document.getElementById("settCacheTtl").value),
+    markets_refresh_minutes:  parseInt(document.getElementById("settMktRefresh").value),
+    news_refresh_minutes:     parseInt(document.getElementById("settNewsRefresh").value),
+  };
+  try {
+    const res  = await fetch("/api/settings", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    msg.textContent = json.status === "ok" ? "&#10003; Saved!" : "&#10007; Error: " + json.message;
+    msg.className   = "save-msg " + (json.status === "ok" ? "save-ok" : "save-err");
+    setTimeout(() => { msg.textContent = ""; }, 3000);
+  } catch(e) {
+    msg.textContent = "&#10007; Network error"; msg.className = "save-msg save-err";
+  }
+}
+
+// ── Cache & States ────────────────────────────────────────────────
+async function clearCache() {
+  const res  = await fetch("/api/cache/clear", {method:"POST"});
+  const json = await res.json();
+  alert(json.status === "ok" ? "Cache cleared! Data will refresh on next page load." : "Error: " + json.message);
+  loadCacheStats();
+}
+
+async function reloadStates() {
+  const res  = await fetch("/api/reload-states", {method:"POST"});
+  const json = await res.json();
+  alert(json.status === "ok" ? "States reloaded from states_data.json" : "Error: " + json.message);
+}
+
+loadSchedulerStatus();
+loadCacheStats();
+setInterval(loadSchedulerStatus, 30000);
+</script>
+{% endblock %}

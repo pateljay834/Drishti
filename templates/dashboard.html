@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}DRISHTI — India Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1 class="page-title">India at a Glance</h1>
+      <p class="page-subtitle">Live markets &middot; 103 news feeds &middot; 36 states &amp; UTs</p>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-live">&#9679; LIVE</span>
+      <span class="badge badge-gray" id="dashTs">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Continuous headline ticker -->
+<div id="breakingBanner" style="display:none" class="breaking-banner">
+  <span class="breaking-label" id="breakingLabel">LATEST</span>
+  <div class="breaking-viewport">
+    <div class="breaking-track" id="breakingTrack"></div>
+  </div>
+</div>
+
+<!-- Dashboard grid -->
+<div class="dashboard-grid">
+
+  <!-- LEFT: India Map -->
+  <div class="dash-col-map">
+    <div class="card map-card">
+      <div class="card-header">
+        <span class="card-title">India — State Explorer</span>
+        <div class="card-actions">
+          <select id="regionFilter" class="micro-select" onchange="filterRegion(this.value)">
+            <option value="">All Regions</option>
+            <option value="north">North</option>
+            <option value="south">South</option>
+            <option value="east">East</option>
+            <option value="west">West</option>
+            <option value="central">Central</option>
+            <option value="northeast">Northeast</option>
+          </select>
+        </div>
+      </div>
+      <div id="indiaMap" class="india-map-container"></div>
+      <div class="map-hint">Click any marker to explore state news &amp; info</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Markets + News -->
+  <div class="dash-col-right">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Market Indices</span>
+        <a href="/markets" class="card-link">Full Markets &#8594;</a>
+      </div>
+      <div class="index-grid" id="indexGrid"><div class="skeleton-block"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Top Headlines</span>
+        <a href="/news" class="card-link">All News &#8594;</a>
+      </div>
+      <div class="news-list" id="newsList"><div class="skeleton-block"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- States grid -->
+<div class="section-header">
+  <h2 class="section-title">States &amp; Union Territories</h2>
+  <div class="section-actions">
+    <input type="text" id="stateSearch" class="search-input"
+           placeholder="Search state..." oninput="filterStates(this.value)">
+    <a href="/states" class="btn-outline">View All &#8594;</a>
+  </div>
+</div>
+<div class="states-mini-grid" id="statesMiniGrid">
+  <div class="skeleton-block" style="height:120px"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const REGION_COLORS = {
+  north:"#3B82F6", south:"#EF4444", east:"#22C55E",
+  west:"#FF6B35",  central:"#F59E0B", northeast:"#8B5CF6"
+};
+let allStates = [], mapInstance, markers = [];
+
+async function loadDashboard() {
+  try {
+    const res  = await fetch("/api/dashboard");
+    const json = await res.json();
+    if (json.status !== "ok") {
+      document.getElementById("dashTs").textContent = "Error loading data";
+      return;
+    }
+    const d = json.data;
+    document.getElementById("dashTs").textContent = json.ts;
+    renderIndexGrid(d.indices || []);
+    renderNewsList(d.headlines || []);
+    renderTicker(d.headlines || []);
+    allStates = d.states || [];
+    renderStatesMini(allStates);
+    initMap(allStates);
+  } catch(e) {
+    console.error("Dashboard load error:", e);
+    document.getElementById("dashTs").textContent = "Connection error — retrying...";
+  }
+}
+
+// ── Continuous headline ticker (same technique as News page) ──────
+function renderTicker(headlines) {
+  const banner = document.getElementById("breakingBanner");
+  const track  = document.getElementById("breakingTrack");
+  const label  = document.getElementById("breakingLabel");
+  if (!headlines.length) { banner.style.display = "none"; return; }
+
+  const hasBreaking = headlines.some(a => a.is_breaking);
+  label.textContent = hasBreaking ? "BREAKING" : "LATEST";
+
+  const items = headlines.slice(0, 10);
+  const itemHtml = items.map(a => {
+    const prefix = a.is_breaking ? `<strong style="color:var(--red)">BREAKING:</strong> ` : "";
+    return `<a href="${a.link}" target="_blank" rel="noopener" class="breaking-item">
+              ${prefix}${a.title}
+              <span class="breaking-time">${a.pub_display || ""}</span>
+            </a>`;
+  }).join("");
+
+  track.innerHTML = itemHtml + itemHtml;
+  track.style.animationDuration = Math.max(20, items.length * 6) + "s";
+  banner.style.display = "flex";
+}
+
+// ── Index grid ────────────────────────────────────────────────────
+function renderIndexGrid(indices) {
+  const priority = ["^BSESN","^NSEI","^NSEBANK","^CNXIT","USDINR=X","GC=F","CL=F","^INDIAVIX"];
+  const ordered  = priority.map(s => indices.find(i => i.symbol===s)).filter(Boolean);
+  const grid = document.getElementById("indexGrid");
+  if (!ordered.length) {
+    grid.innerHTML = '<p class="empty-msg">Market data unavailable — check internet connection.</p>';
+    return;
+  }
+  grid.innerHTML = ordered.map(idx => {
+    const up  = (idx.change_pct || 0) >= 0;
+    const prc = fmtPrice(idx.price, idx.category);
+    return `
+      <div class="idx-card">
+        <div class="idx-name">${idx.name}</div>
+        <div class="idx-price">${prc}</div>
+        <div class="idx-change ${up?"pos":"neg"}">${up?"&#9650;":"&#9660;"} ${Math.abs(idx.change_pct??0).toFixed(2)}%</div>
+      </div>`;
+  }).join("");
+}
+
+function fmtPrice(val, cat) {
+  if (val == null) return "\u2013";
+  if (cat === "currency")  return "\u20B9" + val.toFixed(2);
+  if (cat === "commodity") return "$" + val.toFixed(2);
+  return val >= 1000 ? val.toLocaleString("en-IN", {maximumFractionDigits:2}) : val.toFixed(2);
+}
+
+// ── News list ─────────────────────────────────────────────────────
+function renderNewsList(articles) {
+  const list = document.getElementById("newsList");
+  if (!articles.length) {
+    list.innerHTML = '<p class="empty-msg">No news yet — scheduler is fetching. Refresh in a moment.</p>';
+    return;
+  }
+  list.innerHTML = articles.slice(0,8).map(a=>`
+    <a href="${a.link}" target="_blank" rel="noopener" class="news-item">
+      <div class="news-source-badge">${a.source_icon}</div>
+      <div class="news-body">
+        <div class="news-title">${a.title}</div>
+        <div class="news-meta">${a.source_name} &middot; ${a.pub_display||""}</div>
+      </div>
+    </a>`).join("");
+}
+
+// ── States mini grid ──────────────────────────────────────────────
+function renderStatesMini(statesArr) {
+  document.getElementById("statesMiniGrid").innerHTML = statesArr.map(s=>`
+    <a href="/state/${s.id}" class="state-mini-card" data-region="${s.region}" data-name="${s.name.toLowerCase()}">
+      <div class="smc-accent" style="background:${s.color||"#FF6B35"}"></div>
+      <div class="smc-code">${s.code}</div>
+      <div class="smc-name">${s.name}</div>
+      <div class="smc-capital">${s.capital}</div>
+      <div class="smc-pop">${s.population ? (s.population/1e6).toFixed(1)+"M pop." : ""}</div>
+      <div class="smc-type ${s.type==="UT"?"badge-ut":"badge-state"}">${s.type}</div>
+    </a>`).join("");
+}
+
+function filterStates(q) {
+  document.querySelectorAll(".state-mini-card").forEach(c => {
+    c.style.display = c.dataset.name.includes(q.toLowerCase()) ? "" : "none";
+  });
+}
+
+function filterRegion(region) {
+  document.querySelectorAll(".state-mini-card").forEach(c => {
+    c.style.display = (!region || c.dataset.region===region) ? "" : "none";
+  });
+  if (mapInstance) {
+    markers.forEach(m => {
+      (!region || m.options.region===region) ? m.addTo(mapInstance) : mapInstance.removeLayer(m);
+    });
+  }
+}
+
+// ── Leaflet Map ───────────────────────────────────────────────────
+const COORDS = {
+  jammu_kashmir:[34.08,74.80],ladakh:[34.15,77.57],himachal_pradesh:[31.10,77.17],
+  punjab:[30.73,76.78],haryana:[30.73,76.78],delhi:[28.61,77.21],
+  uttar_pradesh:[26.85,80.95],uttarakhand:[30.32,78.03],rajasthan:[26.91,75.79],
+  gujarat:[23.22,72.64],maharashtra:[19.08,72.88],goa:[15.49,73.83],
+  madhya_pradesh:[23.26,77.41],chhattisgarh:[21.28,81.87],bihar:[25.59,85.14],
+  jharkhand:[23.34,85.31],west_bengal:[22.57,88.36],odisha:[20.30,85.82],
+  sikkim:[27.34,88.61],assam:[26.14,91.74],arunachal_pradesh:[27.08,93.61],
+  nagaland:[25.68,94.11],meghalaya:[25.58,91.89],manipur:[24.82,93.94],
+  mizoram:[23.73,92.72],tripura:[23.94,91.99],karnataka:[12.97,77.59],
+  kerala:[8.52,76.94],tamil_nadu:[13.08,80.27],andhra_pradesh:[16.51,80.65],
+  telangana:[17.39,78.49],chandigarh:[30.73,76.78],dadra_nagar_haveli:[20.18,73.02],
+  lakshadweep:[10.57,72.64],puducherry:[11.94,79.81],andaman_nicobar:[11.74,92.66],
+};
+
+function initMap(statesArr) {
+  if (mapInstance) { mapInstance.remove(); mapInstance = null; markers = []; }
+  mapInstance = L.map("indiaMap", {center:[20.59,78.96],zoom:4,
+    zoomControl:true,scrollWheelZoom:false,tap:false});
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    {attribution:"&copy; OpenStreetMap &copy; CARTO",subdomains:"abcd",maxZoom:10}).addTo(mapInstance);
+  statesArr.forEach(s => {
+    const coord = COORDS[s.id]; if (!coord) return;
+    const color = s.color || REGION_COLORS[s.region] || "#FF6B35";
+    const icon  = L.divIcon({
+      className: "",
+      html: `<div class="map-marker" style="background:${color}"><span>${s.code}</span></div>`,
+      iconSize:[44,44],iconAnchor:[22,22]
+    });
+    const m = L.marker(coord,{icon,region:s.region}).addTo(mapInstance)
+      .bindPopup(`<div class="map-popup">
+        <div class="mp-name">${s.name}</div>
+        <div class="mp-cap">&#127963; ${s.capital}</div>
+        <div class="mp-pop">Pop: ${s.population?(s.population/1e6).toFixed(1)+"M":"–"}</div>
+        <a href="/state/${s.id}" class="mp-link">Explore &amp; Local News &#8594;</a>
+      </div>`,{className:"custom-popup"});
+    markers.push(m);
+  });
+}
+
+loadDashboard();
+setInterval(loadDashboard, 5*60*1000);
+</script>
+{% endblock %}
