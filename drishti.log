@@ -2290,3 +2290,56 @@
 2026-07-05 15:37:20 [INFO] drishti: Fetching top stocks...
 2026-07-05 15:37:21 [INFO] drishti: [scheduler] Markets refreshed
 2026-07-05 15:37:21 [INFO] apscheduler.executors.default: Job "Market indices & stocks (trigger: interval[0:05:00], next run at: 2026-07-05 15:42:18 IST)" executed successfully
+2026-07-05 15:42:18 [INFO] apscheduler.executors.default: Running job "Market indices & stocks (trigger: interval[0:05:00], next run at: 2026-07-05 15:47:18 IST)" (scheduled at 2026-07-05 15:42:18.699827+05:30)
+2026-07-05 15:42:18 [INFO] apscheduler.executors.default: Running job "INR currency crosses (trigger: interval[0:05:00], next run at: 2026-07-05 15:47:18 IST)" (scheduled at 2026-07-05 15:42:18.700440+05:30)
+2026-07-05 15:42:18 [INFO] apscheduler.executors.default: Running job "News aggregation (trigger: interval[0:15:00], next run at: 2026-07-05 15:57:18 IST)" (scheduled at 2026-07-05 15:42:18.700187+05:30)
+2026-07-05 15:42:18 [INFO] drishti: Cache cleared: indices
+2026-07-05 15:42:18 [INFO] drishti: Cache cleared: currency_rates
+2026-07-05 15:42:18 [INFO] drishti: Cache cleared: national_news
+2026-07-05 15:42:18 [INFO] drishti: Cache cleared: top_stocks
+2026-07-05 15:42:18 [INFO] drishti: Fetching all indices...
+2026-07-05 15:42:18 [INFO] drishti: [news] OK economic_times: 20 articles
+2026-07-05 15:42:19 [INFO] drishti: [news] OK et_markets: 20 articles
+2026-07-05 15:42:19 [INFO] drishti: [scheduler] Currency rates refreshed
+2026-07-05 15:42:19 [INFO] drishti: [news] OK the_hindu: 20 articles
+2026-07-05 15:42:19 [INFO] apscheduler.executors.default: Job "INR currency crosses (trigger: interval[0:05:00], next run at: 2026-07-05 15:47:18 IST)" executed successfully
+2026-07-05 15:42:20 [INFO] drishti: Fetching top stocks...
+2026-07-05 15:42:20 [INFO] drishti: [news] OK ndtv_top: 20 articles
+2026-07-05 15:42:20 [INFO] drishti: [news] OK mint: 20 articles
+2026-07-05 15:42:21 [INFO] drishti: [news] OK moneycontrol: 15 articles
+2026-07-05 15:42:21 [INFO] drishti: [news] OK hindu_business: 20 articles
+2026-07-05 15:42:21 [INFO] drishti: [scheduler] Markets refreshed
+2026-07-05 15:42:21 [INFO] apscheduler.executors.default: Job "Market indices & stocks (trigger: interval[0:05:00], next run at: 2026-07-05 15:47:18 IST)" executed successfully
+2026-07-05 15:42:22 [INFO] drishti: [news] OK indian_express: 20 articles
+2026-07-05 15:42:23 [ERROR] drishti: [news] HTTP 403: business_standard
+2026-07-05 15:42:24 [WARNING] drishti: [news] No entries: hindustan_times
+2026-07-05 15:42:24 [ERROR] drishti: [news] HTTP 404: jagran_national
+2026-07-05 15:42:24 [INFO] drishti: [news] OK toi_top: 20 articles
+2026-07-05 15:42:25 [INFO] drishti: [news] OK bhaskar_national: 20 articles
+2026-07-05 15:42:26 [INFO] drishti: [news] OK pib: 20 articles
+2026-07-05 15:42:27 [INFO] drishti: [news] OK inc42: 20 articles
+2026-07-05 15:42:28 [ERROR] drishti: [news] HTTP 410: financial_express
+2026-07-05 15:42:28 [INFO] drishti: [news] OK amar_ujala: 20 articles
+2026-07-05 15:42:28 [ERROR] drishti: [news] HTTP 403: the_print
+2026-07-05 15:42:28 [INFO] drishti: [news] OK hindu_intl: 20 articles
+2026-07-05 15:42:29 [WARNING] drishti: [news] No entries: the_wire
+2026-07-05 15:42:30 [INFO] drishti: [news] OK ndtv_sports: 20 articles
+2026-07-05 15:42:31 [WARNING] drishti: [news] No entries: scroll_in
+2026-07-05 15:42:32 [ERROR] drishti: [news] HTTP 403: ndtv_health
+2026-07-05 15:42:33 [ERROR] drishti: [news] HTTP 404: down_to_earth
+2026-07-05 15:42:34 [WARNING] drishti: [news] No entries: pib_defence
+2026-07-05 15:42:34 [INFO] drishti: [news] OK pib_science: 20 articles
+2026-07-05 15:43:00 [INFO] drishti: [news] National: 302 unique articles
+2026-07-05 15:43:00 [INFO] drishti: [scheduler] News refreshed
+2026-07-05 15:43:00 [INFO] apscheduler.executors.default: Job "News aggregation (trigger: interval[0:15:00], next run at: 2026-07-05 15:57:18 IST)" executed successfully
+2026-07-05 15:47:18 [INFO] apscheduler.executors.default: Running job "Market indices & stocks (trigger: interval[0:05:00], next run at: 2026-07-05 15:52:18 IST)" (scheduled at 2026-07-05 15:47:18.699827+05:30)
+2026-07-05 15:47:18 [INFO] apscheduler.executors.default: Running job "INR currency crosses (trigger: interval[0:05:00], next run at: 2026-07-05 15:52:18 IST)" (scheduled at 2026-07-05 15:47:18.700440+05:30)
+2026-07-05 15:47:18 [INFO] drishti: Cache cleared: currency_rates
+2026-07-05 15:47:18 [INFO] drishti: Cache cleared: indices
+2026-07-05 15:47:18 [INFO] drishti: Cache cleared: top_stocks
+2026-07-05 15:47:18 [INFO] drishti: Fetching all indices...
+2026-07-05 15:47:20 [INFO] drishti: [scheduler] Currency rates refreshed
+2026-07-05 15:47:20 [INFO] apscheduler.executors.default: Job "INR currency crosses (trigger: interval[0:05:00], next run at: 2026-07-05 15:52:18 IST)" executed successfully
+2026-07-05 15:47:20 [INFO] drishti: Fetching top stocks...
+2026-07-05 15:47:22 [INFO] drishti: [scheduler] Markets refreshed
+2026-07-05 15:47:22 [INFO] apscheduler.executors.default: Job "Market indices & stocks (trigger: interval[0:05:00], next run at: 2026-07-05 15:52:18 IST)" executed successfully
